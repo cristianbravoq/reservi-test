@@ -35,7 +35,7 @@ const formSchema = z.object({
   userId: z.string().uuid({ message: "Invalid user ID format." }),
 });
 
-export function TimeBlockForm() {
+export const TimeBlockForm: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [startHour, setStartHour] = useState<string>("00:00");
   const [endHour, setEndHour] = useState<string>("00:00");
@@ -69,7 +69,7 @@ export function TimeBlockForm() {
     }T${startHour}:00`;
     const endTime = `${selectedDate.toISOString().split("T")[0]}T${endHour}:00`;
 
-    const timeBlock = { ...values, startTime, endTime };
+    const timeBlock = { ...values, startTime, endTime, date: new Date() };
     addTimeBlock(timeBlock);
     console.log("Time Block Data:", timeBlock);
   }

@@ -1,47 +1,16 @@
 import * as React from "react";
 import { MoreVertical } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "../ui";
-import { format } from "date-fns";
 
-interface ITimeBlock {
-  id: string;
-  startTime: string;
-  endTime: string;
-  userId: string;
-}
+import { Badge, Button, Popover, PopoverContent, PopoverTrigger } from "../ui";
 
-interface IUser {
-  id: string;
-  name: string;
-  address: string;
-  phoneNumber: string;
-  email: string;
-}
+import { ITimeBlock, IUser } from "@/types";
+import { hours } from "@/lib/format-hours";
 
 interface TimeTableProps {
   date: Date;
   users: IUser[];
   timeBlocks: ITimeBlock[];
 }
-
-const hours = Array.from(
-  { length: 24 },
-  (_, i) => `${i.toString().padStart(2, "0")}:00`
-);
 
 const getUserById = (users: IUser[], userId: string) => {
   return (
@@ -76,32 +45,19 @@ const TimeTable: React.FC<TimeTableProps> = ({ date, users, timeBlocks }) => {
     : filteredTimeBlocks;
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center space-x-4 p-2">
-        <Badge variant="default" className="p-2 text-nowrap">
-          {format(date, "PPP")}
-        </Badge>
-        <Select>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Theme" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="light">Light</SelectItem>
-            <SelectItem value="dark">Dark</SelectItem>
-            <SelectItem value="system">System</SelectItem>
-          </SelectContent>
-        </Select>
-        <Input placeholder="Search..." className="w-full" />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="col-span-1">
-          {hours.map((hour) => (
-            <div key={hour} className="border-b py-2 text-center">
-              {hour}
-            </div>
-          ))}
-        </div>
-        <div className="col-span-3">
+    <div className="space-y-4 w-full">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead>
+          <tr>
+            <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Hour
+            </th>
+            <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Reservation
+            </th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
           {hours.map((hour) => {
             const timeBlock = filteredBlocksByUser.find(
               (block) =>
@@ -112,13 +68,13 @@ const TimeTable: React.FC<TimeTableProps> = ({ date, users, timeBlocks }) => {
               ? getUserById(users, timeBlock.userId)
               : null;
             return (
-              <div
-                key={hour}
-                className="border-b py-2 flex justify-between items-center"
-              >
-                <div>
+              <tr key={hour}>
+                <td className="md:px-6 max-md:pl-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {hour}
+                </td>
+                <td className="flex justify-between gap-2 items-center md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {user ? (
-                    <div className="flex gap-1">
+                    <div className="flex w-full justify-between gap-1 flex-wrap">
                       <Badge variant="outline">{user.name}</Badge>
                       <Badge variant="outline">{user.address}</Badge>
                       <Badge variant="default">{user.phoneNumber}</Badge>
@@ -127,42 +83,42 @@ const TimeTable: React.FC<TimeTableProps> = ({ date, users, timeBlocks }) => {
                   ) : (
                     "No Reservation"
                   )}
-                </div>
-                {timeBlock && (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="h-2 w-2" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      align="end"
-                      className="w-32 flex flex-col gap-2"
-                    >
-                      <Button
-                        variant="default"
-                        size="default"
-                        className="w-full"
-                        onClick={() => handleEdit(timeBlock)}
+                  {timeBlock && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreVertical className="h-2 w-2" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        align="end"
+                        className="w-32 flex flex-col gap-2"
                       >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="default"
-                        className="w-full"
-                        onClick={() => handleDelete(timeBlock)}
-                      >
-                        Delete
-                      </Button>
-                    </PopoverContent>
-                  </Popover>
-                )}
-              </div>
+                        <Button
+                          variant="default"
+                          size="default"
+                          className="w-full"
+                          onClick={() => handleEdit(timeBlock)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="default"
+                          className="w-full"
+                          onClick={() => handleDelete(timeBlock)}
+                        >
+                          Delete
+                        </Button>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                </td>
+              </tr>
             );
           })}
-        </div>
-      </div>
+        </tbody>
+      </table>
     </div>
   );
 };

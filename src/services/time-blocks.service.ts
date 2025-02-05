@@ -18,6 +18,7 @@ const addTimeBlock = (timeBlock: ITimeBlock) => {
         ((timeBlock.startTime >= tb.startTime &&
           timeBlock.startTime < tb.endTime) ||
           (timeBlock.endTime > tb.startTime && timeBlock.endTime <= tb.endTime))
+          
     )
   ) {
     alert("Time block overlaps with an existing one");
