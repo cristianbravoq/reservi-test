@@ -18,6 +18,7 @@ import {
 import { CreateUserForm } from "../user/create-user-form";
 import { TimeBlockForm } from "../time-blocks/time-block-form";
 import { UserFilter } from "../user/filter-user";
+import { handleCreateUser } from "./utils";
 
 const BookingHeader: React.FC = () => {
   const [openDialog1, setOpenDialog1] = React.useState(false);
@@ -25,6 +26,10 @@ const BookingHeader: React.FC = () => {
   const [openDialog3, setOpenDialog3] = React.useState(false);
 
   const date = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+  const onHandleCreateUser = (values: any) => {
+    handleCreateUser(values);
+  }
 
   return (
     <div className="flex justify-between space-x-4 p-2">
@@ -75,7 +80,7 @@ const BookingHeader: React.FC = () => {
                 Complete el formulario para crear un nuevo usuario.
               </DialogDescription>
             </DialogHeader>
-            <CreateUserForm />
+            <CreateUserForm onSubmit={onHandleCreateUser} />
           </DialogContent>
         </Dialog>
 

@@ -12,8 +12,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { addUserService } from "@/services/user.service";
-import { toast } from "@/hooks/use-toast";
 
 // Definir el esquema de validación con zod
 const formSchema = z.object({
@@ -27,11 +25,19 @@ const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
 });
 
-export const CreateUserForm: React.FC = () => {
+interface CreateUserFormProps {
+  initialValues?: z.infer<typeof formSchema>;
+  onSubmit: (values: z.infer<typeof formSchema>) => void;
+}
+
+export const CreateUserForm: React.FC<CreateUserFormProps> = ({
+  initialValues,
+  onSubmit,
+}) => {
   // Configurar useForm con el esquema de validación y valores por defecto
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: initialValues || {
       name: "",
       address: "",
       phoneNumber: "",
@@ -39,35 +45,14 @@ export const CreateUserForm: React.FC = () => {
     },
   });
 
-  // Función para manejar el envío del formulario
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Aquí puedes agregar la lógica para enviar los datos a tu backend
-    try {
-      // Maneja la logica para id del usuario
-
-      // Agregar el id al objeto de usuario
-      const createIdUser = {
-        ...values,
-        id: crypto.randomUUID(),
-      };
-
-      const confirmSaveData = addUserService(createIdUser);
-      if (confirmSaveData) {
-        form.reset(); // Limpiar el formulario después de enviar
-
-        toast({
-          title: "Success",
-          description: "Usuario creado con éxito"
-        });
-      }
-    } catch (error: any) {
-      throw new Error("Error creating user");
-    }
-  }
+  const handleSubmit = (values: z.infer<typeof formSchema>) => {
+    form.reset();
+    onSubmit(values);
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
         <FormField
           control={form.control}
           name="name"
@@ -125,8 +110,9 @@ export const CreateUserForm: React.FC = () => {
           )}
         />
 
-        {/* // Quitar estres visual de los botones, posicionandolo a la izquierda */}
-        <Button type="submit">Crear usuario</Button>
+        <Button type="submit">
+          {initialValues ? "Editar usuario" : "Crear usuario"}
+        </Button>
       </form>
     </Form>
   );

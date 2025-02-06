@@ -16,9 +16,13 @@ const deleteTimeBlockService = (timeBlockId: string) => {
   deleteTimeBlock(timeBlockId);
 };
 
+const deleteAllTimeBlocksByUserService = (userId : string) => {
+  useTimeBlockStore.getState().deleteAllTimeBlocksByUser(userId);
+}
+
 const getTimeBlocksService = () => {
   const getTimeBlocks = useTimeBlockStore.getState().getTimeBlocks;
   return getTimeBlocks();
 };
 
-export { addTimeBlockService, editTimeBlockService, deleteTimeBlockService, getTimeBlocksService };
+export { addTimeBlockService, editTimeBlockService, deleteTimeBlockService, getTimeBlocksService, deleteAllTimeBlocksByUserService };

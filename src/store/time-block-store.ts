@@ -7,6 +7,7 @@ interface TimeBlockState {
   addTimeBlock: (timeBlock: ITimeBlock) => void;
   editTimeBlock: (updatedTimeBlock: ITimeBlock) => void;
   deleteTimeBlock: (timeBlockId: string) => void;
+  deleteAllTimeBlocksByUser: (userId: string) => void;
   getTimeBlocks: () => ITimeBlock[];
 }
 
@@ -22,7 +23,8 @@ const useTimeBlockStore = create<TimeBlockState>()(
               tb.userId === timeBlock.userId &&
               ((timeBlock.startTime >= tb.startTime &&
                 timeBlock.startTime < tb.endTime) ||
-                (timeBlock.endTime > tb.startTime && timeBlock.endTime <= tb.endTime))
+                (timeBlock.endTime > tb.startTime &&
+                  timeBlock.endTime <= tb.endTime))
           )
         ) {
           throw new Error("Time block overlaps with another one");
@@ -41,6 +43,11 @@ const useTimeBlockStore = create<TimeBlockState>()(
       deleteTimeBlock: (timeBlockId: string) => {
         set((state) => ({
           timeBlocks: state.timeBlocks.filter((tb) => tb.id !== timeBlockId),
+        }));
+      },
+      deleteAllTimeBlocksByUser: (userId: string) => {
+        set((state) => ({
+          timeBlocks: state.timeBlocks.filter((tb) => tb.userId !== userId),
         }));
       },
       getTimeBlocks: () => get().timeBlocks,

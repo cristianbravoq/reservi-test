@@ -13,7 +13,8 @@ const addUserService = (user: IUser) => {
 
 const editUserService = (updatedUser: IUser) => {
   const editUser = useUserStore.getState().editUser;
-  return editUser(updatedUser);
+  const responseService = editUser(updatedUser);
+  return responseService;
 };
 
 const deleteUserService = (userId: string) => {

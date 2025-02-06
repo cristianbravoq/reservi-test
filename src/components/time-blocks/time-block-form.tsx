@@ -128,7 +128,16 @@ export const TimeBlockForm: React.FC = () => {
     };
     addTimeBlockService(timeBlock);
 
-    form.reset(); // Limpiar el formulario después de enviar
+    // Limpiar el formulario después de enviar
+    form.reset();
+    // quiero setear los valores a una hora mas de la actual guardada en el state si el valor es 
+    console.log("startHour", startHour);
+    
+    setSelectedDate(undefined);
+    setInputValue("");
+    setFilteredSuggestions([]);
+    setShowSuggestions(false);
+
     toast({
       title: "Success",
       description: "Time block created successfully.",
@@ -165,7 +174,9 @@ export const TimeBlockForm: React.FC = () => {
                           </Badge>
                         ))
                       ) : (
-                        <li>No suggestions available</li>
+                        <li className="text-indigo-400 m-1">
+                          No suggestions available
+                        </li>
                       )}
                     </ul>
                   )}
@@ -203,6 +214,7 @@ export const TimeBlockForm: React.FC = () => {
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
+                    className="text-indigo-400"
                     selected={selectedDate}
                     onSelect={(e) => {
                       setSelectedDate(e);
@@ -224,13 +236,21 @@ export const TimeBlockForm: React.FC = () => {
           <div className="flex flex-col gap-2 items-center justify-center !m-0">
             <FormLabel>Hora inicial</FormLabel>
             <FormControl>
-              <TimePicker onSelect={handleStartTimeChange} value={startHour} />
+              <TimePicker
+                className="text-indigo-600"
+                onSelect={handleStartTimeChange}
+                value={startHour}
+              />
             </FormControl>
           </div>
           <div className="flex flex-col gap-2 items-center justify-center !m-0">
             <FormLabel>Hora Final</FormLabel>
             <FormControl>
-              <TimePicker onSelect={handleEndTimeChange} value={endHour} />
+              <TimePicker
+                className="text-indigo-600"
+                onSelect={handleEndTimeChange}
+                value={endHour}
+              />
             </FormControl>
           </div>
         </FormItem>
