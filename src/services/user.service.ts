@@ -1,42 +1,24 @@
+import useUserStore from "@/store/user-store";
 import { IUser } from "../types/user";
 
-const saveUsers = (users: IUser[]) => {
-  localStorage.setItem("users", JSON.stringify(users));
-};
-
 const getUsersService = () => {
-  const users = localStorage.getItem("users");
-  return users ? JSON.parse(users) : [];
+  const getUsers = useUserStore.getState().getUsers;
+  return getUsers();
 };
 
 const addUserService = (user: IUser) => {
-  const users = getUsersService();
-  if (users.some((u: IUser) => u.phoneNumber === user.phoneNumber)) {
-    alert("Phone number already exists");
-    return;
-  }
-  const newUsers = [...users, user];
-  saveUsers(newUsers);
-
-  return true;
+  const addUser = useUserStore.getState().addUser;
+  return addUser(user);
 };
 
 const editUserService = (updatedUser: IUser) => {
-  const users = getUsersService();
-  const newUsers = users.map((user: IUser) =>
-    user.id === updatedUser.id ? updatedUser : user
-  );
-  saveUsers(newUsers);
-
-  return true;
+  const editUser = useUserStore.getState().editUser;
+  return editUser(updatedUser);
 };
 
 const deleteUserService = (userId: string) => {
-  const users = getUsersService();
-  const newUsers = users.filter((user: IUser) => user.id !== userId);
-  saveUsers(newUsers);
-
-  return true;
+  const deleteUser = useUserStore.getState().deleteUser;
+  return deleteUser(userId);
 };
 
 export { getUsersService, addUserService, editUserService, deleteUserService };

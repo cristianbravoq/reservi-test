@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -24,10 +24,10 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { getUsersService } from "@/services/user.service";
 import { ITimeBlock, IUser } from "@/types";
 import { Badge, Input } from "../ui";
 import { toast } from "@/hooks/use-toast";
+import useUserStore from "@/store/user-store";
 
 // Definir el esquema de validación con zod
 const formSchema = z.object({
@@ -39,15 +39,15 @@ const formSchema = z.object({
 });
 
 export const TimeBlockForm: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [startHour, setStartHour] = useState<string>("00:00");
-  const [endHour, setEndHour] = useState<string>("00:00");
+  const [endHour, setEndHour] = useState<string>("01:00");
+
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const users = useUserStore((state) => state.users);
 
   const [filteredSuggestions, setFilteredSuggestions] = useState<IUser[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [inputValue, setInputValue] = useState("");
-
-  const [initialUsers, setInitialUsers] = useState<IUser[]>([]);
 
   // Configurar useForm con el esquema de validación y valores por defecto
   const form = useForm<z.infer<typeof formSchema>>({
@@ -61,22 +61,10 @@ export const TimeBlockForm: React.FC = () => {
     },
   });
 
-  // Consulta inicial para obtener los usuarios
-  useEffect(() => {
-    const loadUsers = () => {
-      const users = getUsersService();
-      setInitialUsers(users);
-    };
-
-    loadUsers();
-  }, []);
-
   // Actualizar los usuarios con el componente de autocompletar cada vez que cambie form.setValue("userId", value)
   const handleSuggestions = (value: string) => {
     setInputValue(value);
     setShowSuggestions(true);
-
-    const users = initialUsers;
 
     setFilteredSuggestions(
       users.filter((user: IUser) => user.phoneNumber.includes(value))
@@ -89,30 +77,55 @@ export const TimeBlockForm: React.FC = () => {
     setShowSuggestions(false);
   };
 
+  const isDateDisabled = (date: Date) => {
+    const today = new Date();
+    return date < today;
+  };
+
+  const handleStartTimeChange = (e: string) => {
+    setStartHour(e);
+    const [hours, minutes] = e.split(":").map(Number);
+    const newEndHour = new Date();
+    newEndHour.setHours(hours + 1, minutes);
+    const formattedEndHour = newEndHour.toTimeString().slice(0, 5);
+    setEndHour(formattedEndHour);
+    form.setValue("startTime", e);
+    form.setValue("endTime", formattedEndHour);
+  };
+
+  const handleEndTimeChange = (e: string) => {
+    setEndHour(e);
+    const [hours, minutes] = e.split(":").map(Number);
+    const newStartHour = new Date();
+    newStartHour.setHours(hours - 1, minutes);
+    const formattedStartHour = newStartHour.toTimeString().slice(0, 5);
+    setStartHour(formattedStartHour);
+    form.setValue("endTime", e);
+    form.setValue("startTime", formattedStartHour);
+  };
+
   // Función para manejar el envío del formulario
   const onSubmit = () => {
-    if (!selectedDate) {
-      alert("Please select a date.");
-      return;
-    }
+    const startHourTime = form.getValues("startTime");
+    const endHourTime = form.getValues("endTime");
+    // Convertir las horas en un string de tipo date date "2025-02-06T03:00:00.000Z"
+    const startTime = new Date(
+      `${selectedDate!.toISOString().split("T")[0]}T${startHourTime}`
+    );
+    const endTime = new Date(
+      `${selectedDate!.toISOString().split("T")[0]}T${endHourTime}`
+    );
 
-    if (startHour >= endHour) {
-      // Validar que la hora de inicio sea menor a la hora de fin
-    }
-
-    const startTime = form.getValues("startTime");
-    const endTime = form.getValues("endTime");
-
+    const date = form.getValues("date");
     const userId = inputValue;
 
     const timeBlock: ITimeBlock = {
       userId,
       startTime,
       endTime,
-      date: new Date(),
+      date,
       id: crypto.randomUUID(),
     };
-    console.log(timeBlock);
     addTimeBlockService(timeBlock);
 
     form.reset(); // Limpiar el formulario después de enviar
@@ -120,7 +133,7 @@ export const TimeBlockForm: React.FC = () => {
       title: "Success",
       description: "Time block created successfully.",
     });
-  }
+  };
 
   return (
     <Form {...form}>
@@ -198,6 +211,7 @@ export const TimeBlockForm: React.FC = () => {
                       }
                     }}
                     initialFocus
+                    disabled={isDateDisabled}
                   />
                 </PopoverContent>
               </Popover>
@@ -205,20 +219,22 @@ export const TimeBlockForm: React.FC = () => {
             </FormItem>
           )}
         />
+
         <FormItem className="grid grid-flow-col">
           <div className="flex flex-col gap-2 items-center justify-center !m-0">
             <FormLabel>Hora inicial</FormLabel>
             <FormControl>
-              <TimePicker onSelect={(e) => form.setValue("startTime", e)} />
+              <TimePicker onSelect={handleStartTimeChange} value={startHour} />
             </FormControl>
           </div>
           <div className="flex flex-col gap-2 items-center justify-center !m-0">
             <FormLabel>Hora Final</FormLabel>
             <FormControl>
-              <TimePicker onSelect={(e) => form.setValue("endTime", e)} />
+              <TimePicker onSelect={handleEndTimeChange} value={endHour} />
             </FormControl>
           </div>
         </FormItem>
+
         <Button onClick={() => onSubmit()}>Assign Time Block</Button>
       </form>
     </Form>

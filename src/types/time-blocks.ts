@@ -1,7 +1,7 @@
 export interface ITimeBlock {
   id: string;
   date: Date | undefined;
-  startTime: string;
-  endTime: string;
+  startTime: Date;
+  endTime: Date;
   userId: string;
 }

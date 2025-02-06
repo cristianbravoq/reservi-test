@@ -5,46 +5,24 @@ import { Badge, Button, Popover, PopoverContent, PopoverTrigger } from "../ui";
 
 import { ITimeBlock, IUser } from "@/types";
 import { hours } from "@/lib/format-hours";
-import { getUsersService } from "@/services/user.service";
-import { getTimeBlocksService } from "@/services/time-blocks.service";
-import { useEffect } from "react";
+
+import useTimeBlockStore from "@/store/time-block-store";
+import useUserStore from "@/store/user-store";
 
 
 const TimeTable: React.FC = () => {
-  const date = new Date();
+  // dia siguiente al actual 
+  const date = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
   const [selectedUser] = React.useState<string | undefined>();
 
-  const [ users, setUsers ] = React.useState<IUser[]>([]);
-  const [ timeBlocks, setTimeBlocks ] = React.useState<ITimeBlock[]>([]);
+  const timeBlocks = useTimeBlockStore((state) => state.timeBlocks);
+  const users = useUserStore((state) => state.users);
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const users = getUsersService();
-        setUsers(users);
-
-        const timeBlocks = getTimeBlocksService();
-        setTimeBlocks(timeBlocks);
-        console.log("TimeBlocks", timeBlocks);
-        console.log("Users", users);
-      } catch (error) {
-        console.error("Error fetching users: " + error);
-      }
-    };
-
-    fetchUsers();
-  }, []);
-
-  const getUserById = (userId: string) => {
-    return (
-      users.find((user: IUser) => user.id === userId) || {
-        name: "Unknown User",
-        address: "",
-        phoneNumber: "",
-        email: "",
-      }
-    );
+  const getUserByPhoneNumber = (phoneNumber: string) => {
+    console.log(users);
+    const user = users.find((user: IUser) => user.phoneNumber === phoneNumber);
+    return user || null;
   };
 
   const filteredTimeBlocks = timeBlocks.filter(
@@ -58,7 +36,6 @@ const TimeTable: React.FC = () => {
 
   const handleDelete = (timeBlock: ITimeBlock) => {
     console.log("Delete", timeBlock);
-    // Implementar lógica de eliminación
   };
 
   const filteredBlocksByUser = selectedUser
@@ -86,8 +63,9 @@ const TimeTable: React.FC = () => {
                 parseInt(hour.split(":")[0])
             );
             const user = timeBlock
-              ? getUserById(timeBlock.userId)
+              ? getUserByPhoneNumber(timeBlock.userId)
               : null;
+              console.log(user)
             return (
               <tr key={hour}>
                 <td className="md:px-6 max-md:pl-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 max-md:text-xs">

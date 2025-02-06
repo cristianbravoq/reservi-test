@@ -24,7 +24,7 @@ const BookingHeader: React.FC = () => {
   const [openDialog2, setOpenDialog2] = React.useState(false);
   const [openDialog3, setOpenDialog3] = React.useState(false);
 
-  const date = new Date();
+  const date = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
   return (
     <div className="flex justify-between space-x-4 p-2">
