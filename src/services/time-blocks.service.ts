@@ -4,13 +4,13 @@ const saveTimeBlocks = (timeBlocks: ITimeBlock[]) => {
   localStorage.setItem("timeBlocks", JSON.stringify(timeBlocks));
 };
 
-const getTimeBlocks = () => {
+const getTimeBlocksService = () => {
   const timeBlocks = localStorage.getItem("timeBlocks");
   return timeBlocks ? JSON.parse(timeBlocks) : [];
 };
 
-const addTimeBlock = (timeBlock: ITimeBlock) => {
-  const timeBlocks = getTimeBlocks();
+const addTimeBlockService = (timeBlock: ITimeBlock) => {
+  const timeBlocks = getTimeBlocksService();
   if (
     timeBlocks.some(
       (tb: ITimeBlock) =>
@@ -28,20 +28,20 @@ const addTimeBlock = (timeBlock: ITimeBlock) => {
   saveTimeBlocks(newTimeBlocks);
 };
 
-const editTimeBlock = (updatedTimeBlock: ITimeBlock) => {
-  const timeBlocks = getTimeBlocks();
+const editTimeBlockService = (updatedTimeBlock: ITimeBlock) => {
+  const timeBlocks = getTimeBlocksService();
   const newTimeBlocks = timeBlocks.map((tb: ITimeBlock) =>
     tb.id === updatedTimeBlock.id ? updatedTimeBlock : tb
   );
   saveTimeBlocks(newTimeBlocks);
 };
 
-const deleteTimeBlock = (timeBlockId: string) => {
-  const timeBlocks = getTimeBlocks();
+const deleteTimeBlockService = (timeBlockId: string) => {
+  const timeBlocks = getTimeBlocksService();
   const newTimeBlocks = timeBlocks.filter(
     (tb: ITimeBlock) => tb.id !== timeBlockId
   );
   saveTimeBlocks(newTimeBlocks);
 };
 
-export { addTimeBlock, editTimeBlock, deleteTimeBlock, getTimeBlocks };
+export { addTimeBlockService , editTimeBlockService , deleteTimeBlockService, getTimeBlocksService };

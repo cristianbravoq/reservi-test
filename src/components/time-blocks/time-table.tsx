@@ -5,26 +5,47 @@ import { Badge, Button, Popover, PopoverContent, PopoverTrigger } from "../ui";
 
 import { ITimeBlock, IUser } from "@/types";
 import { hours } from "@/lib/format-hours";
+import { getUsersService } from "@/services/user.service";
+import { getTimeBlocksService } from "@/services/time-blocks.service";
+import { useEffect } from "react";
 
-interface TimeTableProps {
-  date: Date;
-  users: IUser[];
-  timeBlocks: ITimeBlock[];
-}
 
-const getUserById = (users: IUser[], userId: string) => {
-  return (
-    users.find((user) => user.id === userId) || {
-      name: "Unknown User",
-      address: "",
-      phoneNumber: "",
-      email: "",
-    }
-  );
-};
+const TimeTable: React.FC = () => {
+  const date = new Date();
 
-const TimeTable: React.FC<TimeTableProps> = ({ date, users, timeBlocks }) => {
   const [selectedUser] = React.useState<string | undefined>();
+
+  const [ users, setUsers ] = React.useState<IUser[]>([]);
+  const [ timeBlocks, setTimeBlocks ] = React.useState<ITimeBlock[]>([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const users = getUsersService();
+        setUsers(users);
+
+        const timeBlocks = getTimeBlocksService();
+        setTimeBlocks(timeBlocks);
+        console.log("TimeBlocks", timeBlocks);
+        console.log("Users", users);
+      } catch (error) {
+        console.error("Error fetching users: " + error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  const getUserById = (userId: string) => {
+    return (
+      users.find((user: IUser) => user.id === userId) || {
+        name: "Unknown User",
+        address: "",
+        phoneNumber: "",
+        email: "",
+      }
+    );
+  };
 
   const filteredTimeBlocks = timeBlocks.filter(
     (block) => new Date(block.startTime).toDateString() === date.toDateString()
@@ -50,10 +71,10 @@ const TimeTable: React.FC<TimeTableProps> = ({ date, users, timeBlocks }) => {
         <thead>
           <tr>
             <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Hour
+              Hora
             </th>
             <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Reservation
+              Reserva
             </th>
           </tr>
         </thead>
@@ -65,11 +86,11 @@ const TimeTable: React.FC<TimeTableProps> = ({ date, users, timeBlocks }) => {
                 parseInt(hour.split(":")[0])
             );
             const user = timeBlock
-              ? getUserById(users, timeBlock.userId)
+              ? getUserById(timeBlock.userId)
               : null;
             return (
               <tr key={hour}>
-                <td className="md:px-6 max-md:pl-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <td className="md:px-6 max-md:pl-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 max-md:text-xs">
                   {hour}
                 </td>
                 <td className="flex justify-between gap-2 items-center md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -86,8 +107,8 @@ const TimeTable: React.FC<TimeTableProps> = ({ date, users, timeBlocks }) => {
                   {timeBlock && (
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreVertical className="h-2 w-2" />
+                        <Button variant="outline" size="icon">
+                          <MoreVertical className="h-3 w-3 m-2" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent
@@ -100,7 +121,7 @@ const TimeTable: React.FC<TimeTableProps> = ({ date, users, timeBlocks }) => {
                           className="w-full"
                           onClick={() => handleEdit(timeBlock)}
                         >
-                          Edit
+                          Editar
                         </Button>
                         <Button
                           variant="outline"
@@ -108,7 +129,7 @@ const TimeTable: React.FC<TimeTableProps> = ({ date, users, timeBlocks }) => {
                           className="w-full"
                           onClick={() => handleDelete(timeBlock)}
                         >
-                          Delete
+                          Eliminar
                         </Button>
                       </PopoverContent>
                     </Popover>

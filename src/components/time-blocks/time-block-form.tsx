@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -13,10 +13,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { TimePicker } from "@/components/ui/time-picker";
-import { addTimeBlock } from "@/services/time-blocks.service";
+import { addTimeBlockService } from "@/services/time-blocks.service";
 import { CalendarIcon } from "lucide-react";
 import {
   Popover,
@@ -25,14 +24,18 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { getUsersService } from "@/services/user.service";
+import { ITimeBlock, IUser } from "@/types";
+import { Badge, Input } from "../ui";
+import { toast } from "@/hooks/use-toast";
 
 // Definir el esquema de validación con zod
 const formSchema = z.object({
   id: z.string().uuid({ message: "Invalid ID format." }),
-  date: z.string().min(1, { message: "Date is required." }),
   startTime: z.string().min(1, { message: "Start time is required." }),
   endTime: z.string().min(1, { message: "End time is required." }),
-  userId: z.string().uuid({ message: "Invalid user ID format." }),
+  userId: z.string().min(1, { message: "User phone is required." }),
+  date: z.date(),
 });
 
 export const TimeBlockForm: React.FC = () => {
@@ -40,38 +43,83 @@ export const TimeBlockForm: React.FC = () => {
   const [startHour, setStartHour] = useState<string>("00:00");
   const [endHour, setEndHour] = useState<string>("00:00");
 
+  const [filteredSuggestions, setFilteredSuggestions] = useState<IUser[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+
+  const [initialUsers, setInitialUsers] = useState<IUser[]>([]);
+
   // Configurar useForm con el esquema de validación y valores por defecto
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       id: "",
-      date: "",
+      date: undefined,
       startTime: "",
       endTime: "",
       userId: "",
     },
   });
 
+  // Consulta inicial para obtener los usuarios
+  useEffect(() => {
+    const loadUsers = () => {
+      const users = getUsersService();
+      setInitialUsers(users);
+    };
+
+    loadUsers();
+  }, []);
+
+  // Actualizar los usuarios con el componente de autocompletar cada vez que cambie form.setValue("userId", value)
+  const handleSuggestions = (value: string) => {
+    setInputValue(value);
+    setShowSuggestions(true);
+
+    const users = initialUsers;
+
+    setFilteredSuggestions(
+      users.filter((user: IUser) => user.phoneNumber.includes(value))
+    ); // Devolver todas las coincidencias de los usuarios
+  };
+
+  const handleShowsSuggestions = (value: string) => {
+    form.setValue("userId", value);
+    setInputValue(value);
+    setShowSuggestions(false);
+  };
+
   // Función para manejar el envío del formulario
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  const onSubmit = () => {
     if (!selectedDate) {
       alert("Please select a date.");
       return;
     }
 
     if (startHour >= endHour) {
-      alert("End time must be greater than start time.");
-      return;
+      // Validar que la hora de inicio sea menor a la hora de fin
     }
 
-    const startTime = `${
-      selectedDate.toISOString().split("T")[0]
-    }T${startHour}:00`;
-    const endTime = `${selectedDate.toISOString().split("T")[0]}T${endHour}:00`;
+    const startTime = form.getValues("startTime");
+    const endTime = form.getValues("endTime");
 
-    const timeBlock = { ...values, startTime, endTime, date: new Date() };
-    addTimeBlock(timeBlock);
-    console.log("Time Block Data:", timeBlock);
+    const userId = inputValue;
+
+    const timeBlock: ITimeBlock = {
+      userId,
+      startTime,
+      endTime,
+      date: new Date(),
+      id: crypto.randomUUID(),
+    };
+    console.log(timeBlock);
+    addTimeBlockService(timeBlock);
+
+    form.reset(); // Limpiar el formulario después de enviar
+    toast({
+      title: "Success",
+      description: "Time block created successfully.",
+    });
   }
 
   return (
@@ -80,11 +128,35 @@ export const TimeBlockForm: React.FC = () => {
         <FormField
           control={form.control}
           name="userId"
-          render={({ field }) => (
+          render={() => (
             <FormItem>
-              <FormLabel>User ID</FormLabel>
+              <FormLabel>Telefono</FormLabel>
               <FormControl>
-                <Input placeholder="User UUID" {...field} />
+                <div className="autocomplete">
+                  <Input
+                    type="tel"
+                    onChange={(e) => handleSuggestions(e.target.value)}
+                    value={inputValue}
+                  />
+                  {showSuggestions && inputValue && (
+                    <ul className="w-auto">
+                      {filteredSuggestions.length ? (
+                        filteredSuggestions.map((suggestion, index) => (
+                          <Badge
+                            key={index}
+                            onClick={() =>
+                              handleShowsSuggestions(suggestion.phoneNumber)
+                            }
+                          >
+                            {suggestion.name} - {suggestion.phoneNumber}
+                          </Badge>
+                        ))
+                      ) : (
+                        <li>No suggestions available</li>
+                      )}
+                    </ul>
+                  )}
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -95,7 +167,7 @@ export const TimeBlockForm: React.FC = () => {
           name="date"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Select Date</FormLabel>
+              <FormLabel>Seleccionar fecha</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -109,7 +181,7 @@ export const TimeBlockForm: React.FC = () => {
                       {field.value ? (
                         format(field.value, "PPP")
                       ) : (
-                        <span>Pick a date</span>
+                        <span>Seleccione una fecha</span>
                       )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
@@ -119,7 +191,12 @@ export const TimeBlockForm: React.FC = () => {
                   <Calendar
                     mode="single"
                     selected={selectedDate}
-                    onSelect={setSelectedDate}
+                    onSelect={(e) => {
+                      setSelectedDate(e);
+                      if (e) {
+                        form.setValue("date", e);
+                      }
+                    }}
                     initialFocus
                   />
                 </PopoverContent>
@@ -130,22 +207,20 @@ export const TimeBlockForm: React.FC = () => {
         />
         <FormItem className="grid grid-flow-col">
           <div className="flex flex-col gap-2 items-center justify-center !m-0">
-            <FormLabel>Start Hour</FormLabel>
+            <FormLabel>Hora inicial</FormLabel>
             <FormControl>
-              <TimePicker onSelect={setStartHour} />
+              <TimePicker onSelect={(e) => form.setValue("startTime", e)} />
             </FormControl>
           </div>
           <div className="flex flex-col gap-2 items-center justify-center !m-0">
-            <FormLabel>End Hour</FormLabel>
+            <FormLabel>Hora Final</FormLabel>
             <FormControl>
-              <TimePicker onSelect={setEndHour} />
+              <TimePicker onSelect={(e) => form.setValue("endTime", e)} />
             </FormControl>
           </div>
         </FormItem>
-        <Button type="submit">Assign Time Block</Button>
+        <Button onClick={() => onSubmit()}>Assign Time Block</Button>
       </form>
     </Form>
   );
-}
-
-export default TimeBlockForm;
+};

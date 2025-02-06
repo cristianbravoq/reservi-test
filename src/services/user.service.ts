@@ -4,33 +4,39 @@ const saveUsers = (users: IUser[]) => {
   localStorage.setItem("users", JSON.stringify(users));
 };
 
-const getUsers = () => {
+const getUsersService = () => {
   const users = localStorage.getItem("users");
   return users ? JSON.parse(users) : [];
 };
 
-const addUser = (user: IUser) => {
-  const users = getUsers();
-  if (users.some((u) => u.phoneNumber === user.phoneNumber)) {
+const addUserService = (user: IUser) => {
+  const users = getUsersService();
+  if (users.some((u: IUser) => u.phoneNumber === user.phoneNumber)) {
     alert("Phone number already exists");
     return;
   }
   const newUsers = [...users, user];
   saveUsers(newUsers);
+
+  return true;
 };
 
-const editUser = (updatedUser: IUser) => {
-  const users = getUsers();
+const editUserService = (updatedUser: IUser) => {
+  const users = getUsersService();
   const newUsers = users.map((user: IUser) =>
     user.id === updatedUser.id ? updatedUser : user
   );
   saveUsers(newUsers);
+
+  return true;
 };
 
-const deleteUser = (userId: string) => {
-  const users = getUsers();
+const deleteUserService = (userId: string) => {
+  const users = getUsersService();
   const newUsers = users.filter((user: IUser) => user.id !== userId);
   saveUsers(newUsers);
+
+  return true;
 };
 
-export { addUser, editUser, deleteUser };
+export { getUsersService, addUserService, editUserService, deleteUserService };

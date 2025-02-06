@@ -12,6 +12,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { addUserService } from "@/services/user.service";
+import { toast } from "@/hooks/use-toast";
 
 // Definir el esquema de validación con zod
 const formSchema = z.object({
@@ -39,8 +41,28 @@ export const CreateUserForm: React.FC = () => {
 
   // Función para manejar el envío del formulario
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("User Data:", values);
     // Aquí puedes agregar la lógica para enviar los datos a tu backend
+    try {
+      // Maneja la logica para id del usuario
+
+      // Agregar el id al objeto de usuario
+      const createIdUser = {
+        ...values,
+        id: crypto.randomUUID(),
+      };
+
+      const confirmSaveData = addUserService(createIdUser);
+      if (confirmSaveData) {
+        form.reset(); // Limpiar el formulario después de enviar
+
+        toast({
+          title: "Success",
+          description: "Usuario creado con éxito"
+        });
+      }
+    } catch (error: any) {
+      throw new Error("Error creating user");
+    }
   }
 
   return (
@@ -51,7 +73,7 @@ export const CreateUserForm: React.FC = () => {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Nombre completo</FormLabel>
               <FormControl>
                 <Input placeholder="John Doe" {...field} />
               </FormControl>
@@ -64,7 +86,7 @@ export const CreateUserForm: React.FC = () => {
           name="address"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Address</FormLabel>
+              <FormLabel>Direccion</FormLabel>
               <FormControl>
                 <Input placeholder="123 Main St" {...field} />
               </FormControl>
@@ -77,7 +99,7 @@ export const CreateUserForm: React.FC = () => {
           name="phoneNumber"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Phone Number</FormLabel>
+              <FormLabel>Numero de telefono</FormLabel>
               <FormControl>
                 <Input placeholder="1234567890" {...field} />
               </FormControl>
@@ -90,7 +112,7 @@ export const CreateUserForm: React.FC = () => {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Correo electronico</FormLabel>
               <FormControl>
                 <Input
                   type="email"
@@ -102,7 +124,9 @@ export const CreateUserForm: React.FC = () => {
             </FormItem>
           )}
         />
-        <Button type="submit">Create User</Button>
+
+        {/* // Quitar estres visual de los botones, posicionandolo a la izquierda */}
+        <Button type="submit">Crear usuario</Button>
       </form>
     </Form>
   );

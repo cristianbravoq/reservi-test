@@ -2,11 +2,13 @@ import * as React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { ListFilterPlusIcon, X } from "lucide-react";
 import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui/toggle-group";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 type FilterKeys = 'name' | 'phone' | 'email';
 
@@ -47,14 +49,15 @@ export const UserFilter: React.FC = () => {
   };
 
   const handleRemoveTag = (tag: string) => {
-    setTags(tags.filter(t => t !== tag));
+    setTags(tags.filter((t) => t !== tag));
   };
 
   return (
     <div className="w-full">
-      <div className="flex justify-center space-x-4">
+      <hr />
+      <div className="flex justify-center space-x-4 mt-2">
+        {/* // Aqui se agregan los elementos del filtro de usuario */}
         <ToggleGroup type="multiple" className="space-x-2">
-          <span>Filters</span>
           {filterOptions.map((filter) => (
             <ToggleGroupItem
               key={filter}
@@ -62,32 +65,69 @@ export const UserFilter: React.FC = () => {
               variant={"outline"}
               aria-label={`Toggle ${filter}`}
               onClick={() => handleToggleChange(filter)}
-              className="px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className={cn(
+                selectedFilters.includes(filter)
+                  ? "bg-primary-foreground text-primary-background"
+                  : "bg-primary-background text-indigo-500"
+              )}
             >
               {filter.charAt(0).toUpperCase() + filter.slice(1)}
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
       </div>
-      <div className="flex justify-center flex-auto flex-wrap gap-4">
-        {selectedFilters.map((filter) => (
-          <div key={filter} className="flex w-auto items-center space-x-1 mt-2">
-            <Input
-              placeholder={`Filter by ${filter}`}
-              value={inputValues[filter]}
-              onChange={(e) => handleInputChange(e, filter)}
-            />
-            <Button onClick={() => handleAddTag(filter)}>Add filter</Button>
-          </div>
-        ))}
+
+      {/* Aqui se digita el nombre, telefono y correo electronico del usuario */}
+
+      <div className="flex justify-center">
+        <Badge variant="default" className="h-min m-2 text-nowrap">
+          Activa el filtro dando clic
+        </Badge>
       </div>
+      <hr className="" />
+
+      {/* // Aqui se digitan los elementos del filtro de usuario */}
+      <div className="flex justify-center flex-auto flex-wrap gap-4">
+        <AnimatePresence>
+          {selectedFilters.map((filter) => (
+            <motion.div
+              key={filter}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="flex w-auto items-center space-x-1 mt-2"
+            >
+              <Input
+                placeholder={`Filter by ${filter}`}
+                value={inputValues[filter]}
+                onChange={(e) => handleInputChange(e, filter)}
+              />
+              <Button variant={"secondary"} onClick={() => handleAddTag(filter)}>
+                <ListFilterPlusIcon />
+              </Button>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {/* // Aqui se muestran los tags */}
       <div className="flex flex-wrap space-x-2">
-        {tags.map((tag, index) => (
-          <Badge key={index} variant="default" className="flex items-center space-x-1 mt-2">
-            <span>{tag}</span>
-            <X className="cursor-pointer" onClick={() => handleRemoveTag(tag)} />
-          </Badge>
-        ))}
+        <AnimatePresence>
+          {tags.map((tag, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="flex items-center space-x-1 mt-2"
+            >
+              <Badge variant="default" className="flex items-center space-x-1">
+                <span>{tag}</span>
+                <X className="cursor-pointer" onClick={() => handleRemoveTag(tag)} />
+              </Badge>
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
     </div>
   );

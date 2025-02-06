@@ -16,13 +16,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { CreateUserForm } from "../user/create-user-form";
-import TimeBlockForm from "../time-blocks/time-block-form";
+import { TimeBlockForm } from "../time-blocks/time-block-form";
 import { UserFilter } from "../user/filter-user";
 
-const BookingHeader: React.FC<{ date: Date }> = ({ date }) => {
+const BookingHeader: React.FC = () => {
   const [openDialog1, setOpenDialog1] = React.useState(false);
   const [openDialog2, setOpenDialog2] = React.useState(false);
   const [openDialog3, setOpenDialog3] = React.useState(false);
+
+  const date = new Date();
 
   return (
     <div className="flex justify-between space-x-4 p-2">
@@ -40,48 +42,63 @@ const BookingHeader: React.FC<{ date: Date }> = ({ date }) => {
             <Button variant="outline">Options</Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-48">
+            {/* // Aquí se agregan los elementos del menú desplegable // */}
+
+            {/* // openDialog1 // */}
             <DropdownMenuItem onSelect={() => setOpenDialog1(true)}>
               Crear usuario
             </DropdownMenuItem>
+
+            {/* // openDialog2 // */}
             <DropdownMenuItem onSelect={() => setOpenDialog2(true)}>
               Asignar reserva
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => setOpenDialog3(true)} className="sm:hidden">
+
+            {/* // openDialog3 // */}
+            <DropdownMenuItem
+              onSelect={() => setOpenDialog3(true)}
+              className="sm:hidden"
+            >
               Filtrar usuarios
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
+        {/* // Dialogs // */}
+
+        {/* // openDialog1 // */}
         <Dialog open={openDialog1} onOpenChange={setOpenDialog1}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create User</DialogTitle>
+              <DialogTitle>Crear usuario</DialogTitle>
               <DialogDescription>
-                Fill out the form to create a new user.
+                Complete el formulario para crear un nuevo usuario.
               </DialogDescription>
             </DialogHeader>
             <CreateUserForm />
           </DialogContent>
         </Dialog>
 
+        {/* // openDialog2 // */}
         <Dialog open={openDialog2} onOpenChange={setOpenDialog2}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Assign Time Block</DialogTitle>
+              <DialogTitle>Asignar reserva</DialogTitle>
               <DialogDescription>
-                Fill out the form to assign a time block.
+                Complete el formulario para asignar un bloque de tiempo.
               </DialogDescription>
             </DialogHeader>
             <TimeBlockForm />
           </DialogContent>
         </Dialog>
 
+        {/* // openDialog3 // */}
         <Dialog open={openDialog3} onOpenChange={setOpenDialog3}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Filter Users</DialogTitle>
-              <DialogDescription>
-                Use the form below to filter users.
+              <DialogTitle>Filtrar usuarios</DialogTitle>
+              <DialogDescription className="text-left">
+                Use el formulario a continuación para filtrar usuarios.
               </DialogDescription>
             </DialogHeader>
             <UserFilter />
