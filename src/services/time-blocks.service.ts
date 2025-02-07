@@ -11,6 +11,12 @@ const editTimeBlockService = (updatedTimeBlock: ITimeBlock) => {
   editTimeBlock(updatedTimeBlock);
 };
 
+const updateTimeBlockIWhenEditUsersService = (oldUserId: string, newUserId: string) => {
+  console.log("entre oldUserId", oldUserId);
+  const updateUserIdsForTimeBlocks = useTimeBlockStore.getState().updateUserIdsForTimeBlocks;
+  updateUserIdsForTimeBlocks(oldUserId, newUserId);
+}
+
 const deleteTimeBlockService = (timeBlockId: string) => {
   const deleteTimeBlock = useTimeBlockStore.getState().deleteTimeBlock;
   deleteTimeBlock(timeBlockId);
@@ -25,4 +31,12 @@ const getTimeBlocksService = () => {
   return getTimeBlocks();
 };
 
-export { addTimeBlockService, editTimeBlockService, deleteTimeBlockService, getTimeBlocksService, deleteAllTimeBlocksByUserService };
+export {
+  addTimeBlockService,
+  editTimeBlockService,
+  updateTimeBlockIWhenEditUsersService,
+  deleteAllTimeBlocksByUserService,
+  deleteTimeBlockService,
+  getTimeBlocksService,
+
+};

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import * as React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,9 +10,8 @@ import {
 } from "@/components/ui/toggle-group";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { setUsersService } from "@/services/user.service";
 import useUserStore from "@/store/user-store";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 type FilterKeys = 'name' | 'phone' | 'email';
 
@@ -26,7 +26,10 @@ export const UserFilter: React.FC = () => {
     email: "",
   });
 
-  const { users } = useUserStore();
+  const { setUsers, usersRef } = useUserStore();
+  // useRef -> para guardar un valor
+  // que queremos que se comparta entre renderizados
+  // pero que al cambiar, no vuelva a renderizar el componente
 
   const handleToggleChange = (value: FilterKeys) => {
     setSelectedFilters((prevSelected) =>
@@ -53,23 +56,25 @@ export const UserFilter: React.FC = () => {
     }
   };
 
-  const handleFilterUsers = (filters: Record<FilterKeys, string>) => {
-    const filtered = users.filter((user) => {
-      return Object.entries(filters).every(([key, value]) => {
+  const filteredUsers = useMemo(() => {
+    const availableUsers = usersRef.current;
+    return [...availableUsers].filter((user) => {
+      return (Object.keys(inputValues) as FilterKeys[]).every((key) => {
+        const value = inputValues[key];
         if (!value) return true;
         return user[key].toLowerCase().includes(value.toLowerCase());
       });
     });
-    setUsersService(filtered);
-  };
+  }, [tags, inputValues]);
+
+  useEffect(() => {
+    setUsers(filteredUsers);
+  }, [filteredUsers, setUsers]);
 
   const handleRemoveTag = (tag: string) => {
     setTags(tags.filter((t) => t !== tag));
   };
 
-  useEffect(() => {
-    handleFilterUsers(inputValues);
-  }, [tags, inputValues]);
 
   return (
     <div className="w-full">
@@ -87,7 +92,7 @@ export const UserFilter: React.FC = () => {
               className={cn(
                 selectedFilters.includes(filter)
                   ? "bg-primary-foreground text-primary-background"
-                  : "bg-primary-background text-indigo-500"
+                  : "bg-primary-background"
               )}
             >
               {filter.charAt(0).toUpperCase() + filter.slice(1)}

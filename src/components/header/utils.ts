@@ -1,4 +1,5 @@
 import { toast } from "@/hooks/use-toast";
+import { updateTimeBlockIWhenEditUsersService } from "@/services/time-blocks.service";
 import { addUserService, editUserService } from "@/services/user.service";
 import { IUser } from "@/types";
 
@@ -25,8 +26,21 @@ const handleCreateUser = (values: IUser) => {
   }
 };
 
-const handleEditUser = (values: IUser) => {
+const handleEditUser = (values: IUser, users: IUser[]) => {
+  const oldUser = users.find((user) => user.phone === values.phone);
   try {
+    // Si oldUser es undefined se debe crear un nuevo usuario
+    if (!oldUser) {
+      handleCreateUser(values);
+      console.log("usuario nuevo", values.phone, oldUser!.phone);
+      // Asignar al nuevo usuario, las reservas asignadas al oldUser
+      updateTimeBlockIWhenEditUsersService(values.phone, oldUser!.phone);
+
+      return;
+    }
+    // Si cambio el numero de telefono de un usuario, se debe cambiar en todas las reservas asociadas a ese usuario
+    console.log("values", values);
+
     const confirmSaveData = editUserService(values);
     if (confirmSaveData) {
       toast({
@@ -35,9 +49,10 @@ const handleEditUser = (values: IUser) => {
       });
     }
   } catch {
+    updateTimeBlockIWhenEditUsersService(values.phone, oldUser!.phone);
     toast({
       title: "Error",
-      description: "Error editing user",
+      description: "Error editando el usuario",
     });
   }
 };

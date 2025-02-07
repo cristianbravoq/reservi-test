@@ -67,7 +67,7 @@ export const TimeBlockForm: React.FC = () => {
     setShowSuggestions(true);
 
     setFilteredSuggestions(
-      users.filter((user: IUser) => user.phoneNumber.includes(value))
+      users.filter((user: IUser) => user.phone.includes(value))
     ); // Devolver todas las coincidencias de los usuarios
   };
 
@@ -107,7 +107,7 @@ export const TimeBlockForm: React.FC = () => {
   // Función para manejar el envío del formulario
   const onSubmit = () => {
     // Validar que exista un usuario real vinculado al número de teléfono
-    const user = users.find((user) => user.phoneNumber === inputValue);
+    const user = users.find((user) => user.phone === inputValue);
     if (!user) {
       toast({
         title: "Error",
@@ -140,9 +140,12 @@ export const TimeBlockForm: React.FC = () => {
 
     // Limpiar el formulario después de enviar
     form.reset();
-    // quiero setear los valores a una hora mas de la actual guardada en el state si el valor es 
+    // Limpiar los error de validacion
+    form.clearErrors();
+
+    // quiero setear los valores a una hora mas de la actual guardada en el state si el valor es
     console.log("startHour", startHour);
-    
+
     setSelectedDate(undefined);
     setInputValue("");
     setFilteredSuggestions([]);
@@ -177,16 +180,14 @@ export const TimeBlockForm: React.FC = () => {
                           <Badge
                             key={index}
                             onClick={() =>
-                              handleShowsSuggestions(suggestion.phoneNumber)
+                              handleShowsSuggestions(suggestion.phone)
                             }
                           >
-                            {suggestion.name} - {suggestion.phoneNumber}
+                            {suggestion.name} - {suggestion.phone}
                           </Badge>
                         ))
                       ) : (
-                        <li className="text-indigo-400 m-1">
-                          No suggestions available
-                        </li>
+                        <li className="m-1">No suggestions available</li>
                       )}
                     </ul>
                   )}
@@ -224,7 +225,7 @@ export const TimeBlockForm: React.FC = () => {
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    className="text-indigo-400"
+                    className=""
                     selected={selectedDate}
                     onSelect={(e) => {
                       setSelectedDate(e);
@@ -247,7 +248,7 @@ export const TimeBlockForm: React.FC = () => {
             <FormLabel>Hora inicial</FormLabel>
             <FormControl>
               <TimePicker
-                className="text-indigo-600"
+                className=""
                 onSelect={handleStartTimeChange}
                 value={startHour}
               />
@@ -257,7 +258,7 @@ export const TimeBlockForm: React.FC = () => {
             <FormLabel>Hora Final</FormLabel>
             <FormControl>
               <TimePicker
-                className="text-indigo-600"
+                className=""
                 onSelect={handleEndTimeChange}
                 value={endHour}
               />

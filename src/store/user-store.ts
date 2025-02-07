@@ -10,45 +10,51 @@ interface UserState {
   editUser: (updatedUser: IUser) => boolean;
   deleteUser: (userId: string) => boolean;
   getUsers: () => IUser[];
+  usersRef: React.MutableRefObject<IUser[]>;
 }
 
 const useUserStore = create<UserState>()(
   persist(
-    (set, get) => ({
-      users: [],
-      setUsers: (users: IUser[]) => {
-        set({ users });
-      },
-      addUser: (user: IUser) => {
-        const users = get().users;
-        if (users.some((u) => u.phoneNumber === user.phoneNumber)) {
-          toast({
-            title: "Error",
-            description: "Phone number already exists",
-          });
-          return false;
-        }
-        set((state) => ({
-          users: [...state.users, user],
-        }));
-        return true;
-      },
-      editUser: (updatedUser: IUser) => {
-        set((state) => ({
-          users: state.users.map((user) =>
-            user.phoneNumber === updatedUser.phoneNumber ? updatedUser : user
-          ),
-        }));
-        return true;
-      },
-      deleteUser: (userId: string) => {
-        set((state) => ({
-          users: state.users.filter((user) => user.id !== userId),
-        }));
-        return true;
-      },
-      getUsers: () => get().users,
-    }),
+    (set, get) => {
+      const usersRef = { current: [] as IUser[] };
+
+      return {
+        users: [],
+        setUsers: (users: IUser[]) => {
+          set({ users });
+        },
+        addUser: (user: IUser) => {
+          const users = get().users;
+          if (users.some((u) => u.phone === user.phone)) {
+            toast({
+              title: "Error",
+              description: "Phone number already exists",
+            });
+            return false;
+          }
+          const newUsers = [...users, user];
+          usersRef.current = newUsers;
+          set({ users: newUsers });
+          return true;
+        },
+        editUser: (updatedUser: IUser) => {
+          const newUsers = get().users.map((user) =>
+            user.phone === updatedUser.phone ? updatedUser : user
+          );
+          usersRef.current = newUsers;
+          set({ users: newUsers });
+          return true;
+        },
+        deleteUser: (userId: string) => {
+          const newUsers = get().users.filter((user) => user.id !== userId);
+          usersRef.current = newUsers;
+          set({ users: newUsers });
+          return true;
+        },
+        getUsers: () => get().users,
+        usersRef,
+      };
+    },
     {
       name: "users-storage", // Nombre de la clave en localStorage
     }

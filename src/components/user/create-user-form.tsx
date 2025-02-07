@@ -19,7 +19,7 @@ const formSchema = z.object({
   address: z
     .string()
     .min(5, { message: "Address must be at least 5 characters." }),
-  phoneNumber: z
+  phone: z
     .string()
     .min(10, { message: "Phone Number must be at least 10 characters." }),
   email: z.string().email({ message: "Invalid email address." }),
@@ -40,7 +40,7 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
     defaultValues: initialValues || {
       name: "",
       address: "",
-      phoneNumber: "",
+      phone: "",
       email: "",
     },
   });
@@ -81,7 +81,7 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
         />
         <FormField
           control={form.control}
-          name="phoneNumber"
+          name="phone"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Numero de telefono</FormLabel>

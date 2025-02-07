@@ -7,6 +7,7 @@ interface TimeBlockState {
   timeBlocks: ITimeBlock[];
   addTimeBlock: (timeBlock: ITimeBlock) => void;
   editTimeBlock: (updatedTimeBlock: ITimeBlock) => void;
+  updateUserIdsForTimeBlocks: (oldUserId: string, newUserId: string) => void;
   deleteTimeBlock: (timeBlockId: string) => void;
   deleteAllTimeBlocksByUser: (userId: string) => void;
   getTimeBlocks: () => ITimeBlock[];
@@ -30,7 +31,7 @@ const useTimeBlockStore = create<TimeBlockState>()(
         ) {
           toast({
             title: "Error",
-            description: "El bloque de tiempo se superpone con otro",
+            description: "Este horario ya no esta disponible",
           });
           throw new Error("El bloque de tiempo se superpone con otro");
         }
@@ -42,6 +43,13 @@ const useTimeBlockStore = create<TimeBlockState>()(
         set((state) => ({
           timeBlocks: state.timeBlocks.map((tb) =>
             tb.id === updatedTimeBlock.id ? updatedTimeBlock : tb
+          ),
+        }));
+      },
+      updateUserIdsForTimeBlocks: (oldUserId: string, newUserId: string) => {
+        set((state) => ({
+          timeBlocks: state.timeBlocks.map((tb) =>
+            tb.userId === oldUserId ? { ...tb, userId: newUserId } : tb
           ),
         }));
       },

@@ -19,6 +19,7 @@ import { handleEditUser } from "../header/utils";
 import { deleteUserService } from "@/services/user.service";
 import { deleteAllTimeBlocksByUserService } from "@/services/time-blocks.service";
 
+
 // Generar colores únicos para cada usuario
 const generateUserColors = (users: IUser[]) => {
   const colors = [
@@ -35,7 +36,7 @@ const generateUserColors = (users: IUser[]) => {
   const userColors: Record<string, string> = {};
   users.forEach((user) => {
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
-    userColors[user.phoneNumber] = randomColor;
+    userColors[user.phone] = randomColor;
   });
   return userColors;
 };
@@ -54,7 +55,7 @@ const TimeTable: React.FC = () => {
   const userColors = React.useMemo(() => generateUserColors(users), [users]);
 
   const getUserByPhoneNumber = (phoneNumber: string) => {
-    const user = users.find((user: IUser) => user.phoneNumber === phoneNumber);
+    const user = users.find((user: IUser) => user.phone === phoneNumber);
     return user || null;
   };
 
@@ -82,7 +83,7 @@ const TimeTable: React.FC = () => {
 
               // Eliminar todos los bloques de tiempo asociado a ese usuario
               const phoneNumerDelete = users.find((user) => user.id === value);
-              deleteAllTimeBlocksByUserService(phoneNumerDelete!.phoneNumber!);
+              deleteAllTimeBlocksByUserService(phoneNumerDelete!.phone!);
               if (confirmSaveData) {
                 toast({
                   title: "Éxito",
@@ -106,8 +107,9 @@ const TimeTable: React.FC = () => {
 
   const onHandleEditUser = (values: any) => {
     try {
-      handleEditUser(values);
+      handleEditUser(values, users);
       setOpenEditDialog(false);
+
       toast({
         title: "Success",
         description: "Usuario editado con éxito",
@@ -158,7 +160,7 @@ const TimeTable: React.FC = () => {
                       <Badge
                         variant="outline"
                         style={{
-                          backgroundColor: userColors[user.phoneNumber],
+                          backgroundColor: userColors[user.phone],
                         }}
                       >
                         {user.name}
@@ -166,7 +168,7 @@ const TimeTable: React.FC = () => {
                       <Badge
                         variant="outline"
                         style={{
-                          backgroundColor: userColors[user.phoneNumber],
+                          backgroundColor: userColors[user.phone],
                         }}
                       >
                         {user.address}
@@ -174,15 +176,15 @@ const TimeTable: React.FC = () => {
                       <Badge
                         variant="outline"
                         style={{
-                          backgroundColor: userColors[user.phoneNumber],
+                          backgroundColor: userColors[user.phone],
                         }}
                       >
-                        {user.phoneNumber}
+                        {user.phone}
                       </Badge>
                       <Badge
                         variant="outline"
                         style={{
-                          backgroundColor: userColors[user.phoneNumber],
+                          backgroundColor: userColors[user.phone],
                         }}
                       >
                         {user.email}
