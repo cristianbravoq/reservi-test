@@ -89,7 +89,7 @@ const TimeTable: React.FC = () => {
                   description: "Usuario eliminado con éxito",
                 });
               }
-            } catch (error) {
+            } catch {
               toast({
                 title: "Error",
                 description: "Hubo un problema al eliminar el usuario",
