@@ -19,16 +19,39 @@ import { handleEditUser } from "../header/utils";
 import { deleteUserService } from "@/services/user.service";
 import { deleteAllTimeBlocksByUserService } from "@/services/time-blocks.service";
 
+// Generar colores únicos para cada usuario
+const generateUserColors = (users: IUser[]) => {
+  const colors = [
+    "#DDE3FF", // Indigo Pastel (Ligero y contrastante)
+    "#C7D2FE", // Indigo 200 (Suave y claro)
+    "#E0E7FF", // Indigo 100 (Muy claro)
+    "#F3E8FF", // Lavanda clara
+    "#FAE8FF", // Rosa lavanda
+    "#DBEAFE", // Azul cielo claro
+    "#FCE7F3", // Rosa pastel
+    "#FEF9C3", // Amarillo pastel claro
+    "#CFFAFE", // Azul turquesa claro
+  ];
+  const userColors: Record<string, string> = {};
+  users.forEach((user) => {
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    userColors[user.phoneNumber] = randomColor;
+  });
+  return userColors;
+};
+
 const TimeTable: React.FC = () => {
   // dia siguiente al actual
   const date = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-  const [selectedUser, setSelectedUser] = React.useState<string | undefined>();
+  const [selectedUser] = React.useState<string | undefined>();
   const [openEditDialog, setOpenEditDialog] = React.useState(false);
   const [editingUser, setEditingUser] = React.useState<IUser | null>(null);
 
   const timeBlocks = useTimeBlockStore((state) => state.timeBlocks);
   const users = useUserStore((state) => state.users);
+
+  const userColors = React.useMemo(() => generateUserColors(users), [users]);
 
   const getUserByPhoneNumber = (phoneNumber: string) => {
     const user = users.find((user: IUser) => user.phoneNumber === phoneNumber);
@@ -58,8 +81,8 @@ const TimeTable: React.FC = () => {
               const confirmSaveData = await deleteUserService(value);
 
               // Eliminar todos los bloques de tiempo asociado a ese usuario
-              const phoneNumerDelete = users.find((user) => user.id === value)
-              deleteAllTimeBlocksByUserService(phoneNumerDelete?.phoneNumber!);              
+              const phoneNumerDelete = users.find((user) => user.id === value);
+              deleteAllTimeBlocksByUserService(phoneNumerDelete!.phoneNumber!);
               if (confirmSaveData) {
                 toast({
                   title: "Éxito",
@@ -89,7 +112,7 @@ const TimeTable: React.FC = () => {
         title: "Success",
         description: "Usuario editado con éxito",
       });
-    } catch (error: any) {
+    } catch {
       toast({
         title: "Error",
         description: "Error al editar un usario",
@@ -132,10 +155,38 @@ const TimeTable: React.FC = () => {
                 <td className="flex justify-between gap-2 items-center md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {user ? (
                     <div className="flex w-full justify-between gap-1 flex-wrap">
-                      <Badge variant="outline">{user.name}</Badge>
-                      <Badge variant="outline">{user.address}</Badge>
-                      <Badge variant="default">{user.phoneNumber}</Badge>
-                      <Badge variant="outline">{user.email}</Badge>
+                      <Badge
+                        variant="outline"
+                        style={{
+                          backgroundColor: userColors[user.phoneNumber],
+                        }}
+                      >
+                        {user.name}
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        style={{
+                          backgroundColor: userColors[user.phoneNumber],
+                        }}
+                      >
+                        {user.address}
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        style={{
+                          backgroundColor: userColors[user.phoneNumber],
+                        }}
+                      >
+                        {user.phoneNumber}
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        style={{
+                          backgroundColor: userColors[user.phoneNumber],
+                        }}
+                      >
+                        {user.email}
+                      </Badge>
                     </div>
                   ) : (
                     "No Reservation"
@@ -163,7 +214,7 @@ const TimeTable: React.FC = () => {
                           variant="outline"
                           size="default"
                           className="w-full"
-                          onClick={() => onHandleDelete(user?.id!)}
+                          onClick={() => onHandleDelete(user!.id!)}
                         >
                           Eliminar
                         </Button>
