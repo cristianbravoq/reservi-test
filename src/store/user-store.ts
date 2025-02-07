@@ -5,6 +5,7 @@ import { toast } from "@/hooks/use-toast";
 
 interface UserState {
   users: IUser[];
+  setUsers: (users: IUser[]) => void;
   addUser: (user: IUser) => boolean;
   editUser: (updatedUser: IUser) => boolean;
   deleteUser: (userId: string) => boolean;
@@ -15,6 +16,9 @@ const useUserStore = create<UserState>()(
   persist(
     (set, get) => ({
       users: [],
+      setUsers: (users: IUser[]) => {
+        set({ users });
+      },
       addUser: (user: IUser) => {
         const users = get().users;
         if (users.some((u) => u.phoneNumber === user.phoneNumber)) {

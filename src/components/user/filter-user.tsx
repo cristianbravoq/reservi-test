@@ -9,6 +9,9 @@ import {
 } from "@/components/ui/toggle-group";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { setUsersService } from "@/services/user.service";
+import useUserStore from "@/store/user-store";
+import { useEffect } from "react";
 
 type FilterKeys = 'name' | 'phone' | 'email';
 
@@ -22,6 +25,8 @@ export const UserFilter: React.FC = () => {
     phone: "",
     email: "",
   });
+
+  const { users } = useUserStore();
 
   const handleToggleChange = (value: FilterKeys) => {
     setSelectedFilters((prevSelected) =>
@@ -48,9 +53,23 @@ export const UserFilter: React.FC = () => {
     }
   };
 
+  const handleFilterUsers = (filters: Record<FilterKeys, string>) => {
+    const filtered = users.filter((user) => {
+      return Object.entries(filters).every(([key, value]) => {
+        if (!value) return true;
+        return user[key].toLowerCase().includes(value.toLowerCase());
+      });
+    });
+    setUsersService(filtered);
+  };
+
   const handleRemoveTag = (tag: string) => {
     setTags(tags.filter((t) => t !== tag));
   };
+
+  useEffect(() => {
+    handleFilterUsers(inputValues);
+  }, [tags, inputValues]);
 
   return (
     <div className="w-full">
@@ -80,7 +99,7 @@ export const UserFilter: React.FC = () => {
       {/* Aqui se digita el nombre, telefono y correo electronico del usuario */}
 
       <div className="flex justify-center">
-        <Badge variant="default" className="h-min m-2 text-nowrap">
+        <Badge variant="secondary" className="h-min m-2 text-nowrap">
           Activa el filtro dando clic
         </Badge>
       </div>

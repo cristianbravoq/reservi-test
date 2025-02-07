@@ -106,6 +106,16 @@ export const TimeBlockForm: React.FC = () => {
 
   // Función para manejar el envío del formulario
   const onSubmit = () => {
+    // Validar que exista un usuario real vinculado al número de teléfono
+    const user = users.find((user) => user.phoneNumber === inputValue);
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "User not found.",
+      });
+      return;
+    }
+
     const startHourTime = form.getValues("startTime");
     const endHourTime = form.getValues("endTime");
     // Convertir las horas en un string de tipo date date "2025-02-06T03:00:00.000Z"

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { ITimeBlock } from "../types/time-blocks";
+import { toast } from "@/hooks/use-toast";
 
 interface TimeBlockState {
   timeBlocks: ITimeBlock[];
@@ -27,7 +28,11 @@ const useTimeBlockStore = create<TimeBlockState>()(
                   timeBlock.endTime <= tb.endTime))
           )
         ) {
-          throw new Error("Time block overlaps with another one");
+          toast({
+            title: "Error",
+            description: "El bloque de tiempo se superpone con otro",
+          });
+          throw new Error("El bloque de tiempo se superpone con otro");
         }
         set((state) => ({
           timeBlocks: [...state.timeBlocks, timeBlock],

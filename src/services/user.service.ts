@@ -22,4 +22,9 @@ const deleteUserService = (userId: string) => {
   return deleteUser(userId);
 };
 
-export { getUsersService, addUserService, editUserService, deleteUserService };
+const setUsersService = (userS: IUser[]) => {
+  const setUsers = useUserStore.getState().setUsers;
+  return setUsers(userS);
+}
+
+export { getUsersService, addUserService, editUserService, deleteUserService, setUsersService };
