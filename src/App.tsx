@@ -1,7 +1,7 @@
 
-import TimeTable from "./components/time-blocks/time-table";
-import BookingHeader from "./components/header/booking-header";
-import { Toaster } from "./components/ui";
+import { TimeTable } from "./components/time-blocks/time-table";
+import { BookingHeader } from "./components/header/booking-header";
+import { Toaster } from "./components/ui/toaster";
 
 function App() {
 

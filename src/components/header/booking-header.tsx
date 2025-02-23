@@ -1,5 +1,6 @@
 import * as React from "react";
 import { format } from "date-fns";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,12 +16,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 import { CreateUserForm } from "../user/create-user-form";
 import { TimeBlockForm } from "../time-blocks/time-block-form";
 import { UserFilter } from "../user/filter-user";
 import { handleCreateUser } from "./utils";
 
-const BookingHeader: React.FC = () => {
+export const BookingHeader: React.FC = () => {
   const [openDialog1, setOpenDialog1] = React.useState(false);
   const [openDialog2, setOpenDialog2] = React.useState(false);
   const [openDialog3, setOpenDialog3] = React.useState(false);
@@ -33,6 +35,7 @@ const BookingHeader: React.FC = () => {
 
   return (
     <div className="flex justify-between space-x-4 p-2">
+      
       <Badge variant="default" className="h-min p-2 text-nowrap">
         {format(date, "PPP")}
       </Badge>
@@ -113,5 +116,3 @@ const BookingHeader: React.FC = () => {
     </div>
   );
 };
-
-export default BookingHeader;

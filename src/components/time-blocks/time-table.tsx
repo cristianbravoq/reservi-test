@@ -1,10 +1,10 @@
 import * as React from "react";
-import { MoreVertical } from "lucide-react";
-import { Badge, Button, Popover, PopoverContent, PopoverTrigger } from "../ui";
-import { ITimeBlock, IUser } from "@/types";
+
 import { hours } from "@/lib/format-hours";
+
 import useTimeBlockStore from "@/store/time-block-store";
 import useUserStore from "@/store/user-store";
+
 import {
   Dialog,
   DialogContent,
@@ -14,38 +14,28 @@ import {
 } from "@/components/ui/dialog";
 
 import { toast } from "@/hooks/use-toast";
-import { CreateUserForm } from "../user/create-user-form";
-import { handleEditUser } from "../header/utils";
+import { CreateUserForm } from "@/components/user/create-user-form";
+import { handleEditUser } from "@/components/header/utils";
 import { deleteUserService } from "@/services/user.service";
 import { deleteAllTimeBlocksByUserService } from "@/services/time-blocks.service";
+import { generateUserColors } from "@/lib/generate-row-colors";
+import UserReservation from "../user/user-reservation";
+import { IUser } from "@/types/user";
+import { ITimeBlock } from "@/types/time-blocks";
+import { getUserByPhoneNumber } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
-
-// Generar colores únicos para cada usuario
-const generateUserColors = (users: IUser[]) => {
-  const colors = [
-    "#DDE3FF", // Indigo Pastel (Ligero y contrastante)
-    "#C7D2FE", // Indigo 200 (Suave y claro)
-    "#E0E7FF", // Indigo 100 (Muy claro)
-    "#F3E8FF", // Lavanda clara
-    "#FAE8FF", // Rosa lavanda
-    "#DBEAFE", // Azul cielo claro
-    "#FCE7F3", // Rosa pastel
-    "#FEF9C3", // Amarillo pastel claro
-    "#CFFAFE", // Azul turquesa claro
-  ];
-  const userColors: Record<string, string> = {};
-  users.forEach((user) => {
-    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-    userColors[user.phone] = randomColor;
-  });
-  return userColors;
-};
-
-const TimeTable: React.FC = () => {
+export const TimeTable: React.FC = () => {
   // dia siguiente al actual
   const date = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-  const [selectedUser] = React.useState<string | undefined>();
+  const [selectedUser, setSelectedUser] = React.useState<string | undefined>();
   const [openEditDialog, setOpenEditDialog] = React.useState(false);
   const [editingUser, setEditingUser] = React.useState<IUser | null>(null);
 
@@ -54,20 +44,34 @@ const TimeTable: React.FC = () => {
 
   const userColors = React.useMemo(() => generateUserColors(users), [users]);
 
-  const getUserByPhoneNumber = (phoneNumber: string) => {
-    const user = users.find((user: IUser) => user.phone === phoneNumber);
-    return user || null;
-  };
-
   const filteredTimeBlocks = timeBlocks.filter(
     (block) => new Date(block.startTime).toDateString() === date.toDateString()
   );
 
   const handleEdit = (timeBlock: ITimeBlock) => {
-    const user = getUserByPhoneNumber(timeBlock.userId);
+    const user = getUserByPhoneNumber(timeBlock.userId, users);
     if (user) {
       setEditingUser(user);
       setOpenEditDialog(true);
+    }
+  };
+
+  // Sacar estas funciones aparte, para solo llamar una funcion que maneja los errores y 
+  // los mensajes de exito
+  const onHandleEditUser = (values: any) => {
+    try {
+      handleEditUser(values, users);
+      setOpenEditDialog(false);
+
+      toast({
+        title: "Success",
+        description: "Usuario editado con éxito",
+      });
+    } catch {
+      toast({
+        title: "Error",
+        description: "Error al editar un usario",
+      });
     }
   };
 
@@ -105,29 +109,30 @@ const TimeTable: React.FC = () => {
     });
   };
 
-  const onHandleEditUser = (values: any) => {
-    try {
-      handleEditUser(values, users);
-      setOpenEditDialog(false);
+  const filteredBlocksByUser = React.useMemo(() => {
+    const blockTimesUsers = selectedUser
+      ? filteredTimeBlocks.filter((block) => block.userId === selectedUser)
+      : filteredTimeBlocks;
 
-      toast({
-        title: "Success",
-        description: "Usuario editado con éxito",
-      });
-    } catch {
-      toast({
-        title: "Error",
-        description: "Error al editar un usario",
-      });
-    }
-  };
-
-  const filteredBlocksByUser = selectedUser
-    ? filteredTimeBlocks.filter((block) => block.userId === selectedUser)
-    : filteredTimeBlocks;
+    return blockTimesUsers;
+  }, [selectedUser, filteredTimeBlocks]);
 
   return (
     <div className="space-y-4 w-full">
+
+      <Select onValueChange={(value) => setSelectedUser(value)}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select a user" />
+        </SelectTrigger>
+        <SelectContent>
+          {users.map((user) => (
+            <SelectItem key={user.id} value={user.phone}>
+              {user.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
       <table className="min-w-full divide-y divide-gray-200">
         <thead>
           <tr>
@@ -147,7 +152,7 @@ const TimeTable: React.FC = () => {
                 parseInt(hour.split(":")[0])
             );
             const user = timeBlock
-              ? getUserByPhoneNumber(timeBlock.userId)
+              ? getUserByPhoneNumber(timeBlock.userId, users)
               : null;
             return (
               <tr key={hour}>
@@ -155,74 +160,13 @@ const TimeTable: React.FC = () => {
                   {hour}
                 </td>
                 <td className="flex justify-between gap-2 items-center md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user ? (
-                    <div className="flex w-full justify-between gap-1 flex-wrap">
-                      <Badge
-                        variant="outline"
-                        style={{
-                          backgroundColor: userColors[user.phone],
-                        }}
-                      >
-                        {user.name}
-                      </Badge>
-                      <Badge
-                        variant="outline"
-                        style={{
-                          backgroundColor: userColors[user.phone],
-                        }}
-                      >
-                        {user.address}
-                      </Badge>
-                      <Badge
-                        variant="outline"
-                        style={{
-                          backgroundColor: userColors[user.phone],
-                        }}
-                      >
-                        {user.phone}
-                      </Badge>
-                      <Badge
-                        variant="outline"
-                        style={{
-                          backgroundColor: userColors[user.phone],
-                        }}
-                      >
-                        {user.email}
-                      </Badge>
-                    </div>
-                  ) : (
-                    "No Reservation"
-                  )}
-                  {timeBlock && (
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" size="icon">
-                          <MoreVertical className="h-3 w-3 m-2" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent
-                        align="end"
-                        className="w-32 flex flex-col gap-2"
-                      >
-                        <Button
-                          variant="default"
-                          size="default"
-                          className="w-full"
-                          onClick={() => handleEdit(timeBlock)}
-                        >
-                          Editar
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="default"
-                          className="w-full"
-                          onClick={() => onHandleDelete(user!.id!)}
-                        >
-                          Eliminar
-                        </Button>
-                      </PopoverContent>
-                    </Popover>
-                  )}
+                  <UserReservation
+                    user={user}
+                    timeBlock={timeBlock}
+                    userColors={userColors}
+                    handleEdit={handleEdit}
+                    onHandleDelete={onHandleDelete}
+                  />
                 </td>
               </tr>
             );
@@ -248,5 +192,3 @@ const TimeTable: React.FC = () => {
     </div>
   );
 };
-
-export default TimeTable;

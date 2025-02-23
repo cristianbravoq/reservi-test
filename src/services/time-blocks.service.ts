@@ -1,5 +1,5 @@
 import useTimeBlockStore from "@/store/time-block-store";
-import { ITimeBlock } from "../types/time-blocks";
+import { ITimeBlock } from "@/types/time-blocks";
 
 const addTimeBlockService = (timeBlock: ITimeBlock) => {
   const addTimeBlock = useTimeBlockStore.getState().addTimeBlock;
@@ -12,7 +12,6 @@ const editTimeBlockService = (updatedTimeBlock: ITimeBlock) => {
 };
 
 const updateTimeBlockIWhenEditUsersService = (oldUserId: string, newUserId: string) => {
-  console.log("entre oldUserId", oldUserId);
   const updateUserIdsForTimeBlocks = useTimeBlockStore.getState().updateUserIdsForTimeBlocks;
   updateUserIdsForTimeBlocks(oldUserId, newUserId);
 }

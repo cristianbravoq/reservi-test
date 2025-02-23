@@ -4,23 +4,24 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ListFilterPlusIcon, X } from "lucide-react";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import useUserStore from "@/store/user-store";
 import { useEffect, useMemo } from "react";
 
-type FilterKeys = 'name' | 'phone' | 'email';
+type FilterKeys = "name" | "phone" | "email";
 
-const filterOptions: FilterKeys[] = ['name', 'phone', 'email'];
+const filterOptions: FilterKeys[] = ["name", "phone", "email"];
 
 export const UserFilter: React.FC = () => {
-  const [selectedFilters, setSelectedFilters] = React.useState<FilterKeys[]>([]);
+  const [selectedFilters, setSelectedFilters] = React.useState<FilterKeys[]>(
+    []
+  );
   const [tags, setTags] = React.useState<string[]>([]);
-  const [inputValues, setInputValues] = React.useState<Record<FilterKeys, string>>({
+  const [inputValues, setInputValues] = React.useState<
+    Record<FilterKeys, string>
+  >({
     name: "",
     phone: "",
     email: "",
@@ -39,7 +40,10 @@ export const UserFilter: React.FC = () => {
     );
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, filter: FilterKeys) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    filter: FilterKeys
+  ) => {
     setInputValues((prevValues) => ({
       ...prevValues,
       [filter]: e.target.value,
@@ -47,7 +51,10 @@ export const UserFilter: React.FC = () => {
   };
 
   const handleAddTag = (filter: FilterKeys) => {
-    if (inputValues[filter] && !tags.includes(`${filter}: ${inputValues[filter]}`)) {
+    if (
+      inputValues[filter] &&
+      !tags.includes(`${filter}: ${inputValues[filter]}`)
+    ) {
       setTags([...tags, `${filter}: ${inputValues[filter]}`]);
       setInputValues((prevValues) => ({
         ...prevValues,
@@ -74,7 +81,6 @@ export const UserFilter: React.FC = () => {
   const handleRemoveTag = (tag: string) => {
     setTags(tags.filter((t) => t !== tag));
   };
-
 
   return (
     <div className="w-full">
@@ -117,16 +123,21 @@ export const UserFilter: React.FC = () => {
             <motion.div
               key={filter}
               initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
+              animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="flex w-auto items-center space-x-1 mt-2"
+              className="flex w-auto items-center mt-2"
             >
               <Input
+                className="rounded-r-none"
                 placeholder={`Filter by ${filter}`}
                 value={inputValues[filter]}
                 onChange={(e) => handleInputChange(e, filter)}
               />
-              <Button variant={"secondary"} onClick={() => handleAddTag(filter)}>
+              <Button
+                className="rounded-l-none"
+                variant={"secondary"}
+                onClick={() => handleAddTag(filter)}
+              >
                 <ListFilterPlusIcon />
               </Button>
             </motion.div>
@@ -147,7 +158,10 @@ export const UserFilter: React.FC = () => {
             >
               <Badge variant="default" className="flex items-center space-x-1">
                 <span>{tag}</span>
-                <X className="cursor-pointer" onClick={() => handleRemoveTag(tag)} />
+                <X
+                  className="cursor-pointer"
+                  onClick={() => handleRemoveTag(tag)}
+                />
               </Badge>
             </motion.div>
           ))}

@@ -1,7 +1,7 @@
 import { toast } from "@/hooks/use-toast";
 import { updateTimeBlockIWhenEditUsersService } from "@/services/time-blocks.service";
 import { addUserService, editUserService } from "@/services/user.service";
-import { IUser } from "@/types";
+import { IUser } from "@/types/user";
 
 const handleCreateUser = (values: IUser) => {
   try {

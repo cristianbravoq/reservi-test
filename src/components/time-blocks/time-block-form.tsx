@@ -1,5 +1,3 @@
-"use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -24,8 +22,10 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { ITimeBlock, IUser } from "@/types";
-import { Badge, Input } from "../ui";
+import { IUser } from "@/types/user";
+import { ITimeBlock } from "@/types/time-blocks";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import useUserStore from "@/store/user-store";
 

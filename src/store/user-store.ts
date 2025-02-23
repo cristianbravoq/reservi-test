@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { IUser } from "../types/user";
-import { toast } from "@/hooks/use-toast";
 
 interface UserState {
   users: IUser[];
@@ -26,10 +25,6 @@ const useUserStore = create<UserState>()(
         addUser: (user: IUser) => {
           const users = get().users;
           if (users.some((u) => u.phone === user.phone)) {
-            toast({
-              title: "Error",
-              description: "Phone number already exists",
-            });
             return false;
           }
           const newUsers = [...users, user];
