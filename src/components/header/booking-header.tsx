@@ -17,10 +17,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import { CreateUserForm } from "../user/create-user-form";
-import { TimeBlockForm } from "../time-blocks/time-block-form";
-import { UserFilter } from "../user/filter-user";
+import { CreateUserForm } from "../user/form/user-form";
+import { BookingForm } from "../bookings/form/booking-form";
+import { BookingsFilter } from "../filter/bookings-filter";
 import { handleCreateUser } from "./utils";
+import { TagsFilters } from "../filter/tags-filters";
 
 export const BookingHeader: React.FC = () => {
   const [openDialog1, setOpenDialog1] = React.useState(false);
@@ -31,18 +32,19 @@ export const BookingHeader: React.FC = () => {
 
   const onHandleCreateUser = (values: any) => {
     handleCreateUser(values);
-  }
+  };
 
   return (
-    <div className="flex justify-between space-x-4 p-2">
-      
+    <div className="flex justify-between space-x-4 p-2 m-2">
       <Badge variant="default" className="h-min p-2 text-nowrap">
         {format(date, "PPP")}
       </Badge>
 
-      <div className="hidden sm:block">
-        <UserFilter />
-      </div>
+        <div className="hidden sm:block">
+          <BookingsFilter />
+          <TagsFilters />
+        </div>
+
 
       <div className="relative inline-block text-left">
         <DropdownMenu>
@@ -96,7 +98,7 @@ export const BookingHeader: React.FC = () => {
                 Complete el formulario para asignar un bloque de tiempo.
               </DialogDescription>
             </DialogHeader>
-            <TimeBlockForm />
+            <BookingForm />
           </DialogContent>
         </Dialog>
 
@@ -109,7 +111,7 @@ export const BookingHeader: React.FC = () => {
                 Use el formulario a continuación para filtrar usuarios.
               </DialogDescription>
             </DialogHeader>
-            <UserFilter />
+            <BookingsFilter />
           </DialogContent>
         </Dialog>
       </div>

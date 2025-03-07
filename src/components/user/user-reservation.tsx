@@ -1,7 +1,7 @@
 import * as React from "react";
 import { MoreVertical } from "lucide-react";
 import { IUser } from "@/types/user";
-import { ITimeBlock } from "@/types/time-blocks";
+import { IBooking } from "@/types/booking";
 import { Badge } from "@/components/ui/badge";
 import {
   Popover,
@@ -12,15 +12,15 @@ import { Button } from "@/components/ui/button";
 
 interface UserReservationProps {
   user: IUser | null;
-  timeBlock: ITimeBlock | undefined;
+  booking: IBooking | undefined;
   userColors: Record<string, string>;
-  handleEdit: (timeBlock: ITimeBlock) => void;
+  handleEdit: (booking: IBooking) => void;
   onHandleDelete: (userId: string) => void;
 }
 
 const UserReservation: React.FC<UserReservationProps> = ({
   user,
-  timeBlock,
+  booking,
   userColors,
   handleEdit,
   onHandleDelete,
@@ -65,7 +65,7 @@ const UserReservation: React.FC<UserReservationProps> = ({
       ) : (
         "No Reservation"
       )}
-      {timeBlock && (
+      {booking && (
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" size="icon">
@@ -77,7 +77,7 @@ const UserReservation: React.FC<UserReservationProps> = ({
               variant="default"
               size="default"
               className="w-full"
-              onClick={() => handleEdit(timeBlock)}
+              onClick={() => handleEdit(booking)}
             >
               Editar
             </Button>

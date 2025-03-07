@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { hours } from "@/lib/format-hours";
 
-import useTimeBlockStore from "@/store/time-block-store";
+import useBookingStore from "@/store/booking-store";
 import useUserStore from "@/store/user-store";
 
 import {
@@ -14,14 +14,14 @@ import {
 } from "@/components/ui/dialog";
 
 import { toast } from "@/hooks/use-toast";
-import { CreateUserForm } from "@/components/user/create-user-form";
+import { CreateUserForm } from "@/components/user/form/user-form";
 import { handleEditUser } from "@/components/header/utils";
 import { deleteUserService } from "@/services/user.service";
-import { deleteAllTimeBlocksByUserService } from "@/services/time-blocks.service";
+import { deleteAllBookingsByUserService } from "@/services/booking.service";
 import { generateUserColors } from "@/lib/generate-row-colors";
 import UserReservation from "../user/user-reservation";
 import { IUser } from "@/types/user";
-import { ITimeBlock } from "@/types/time-blocks";
+import { IBooking } from "@/types/booking";
 import { getUserByPhoneNumber } from "@/lib/utils";
 import {
   Select,
@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { TagsFilters } from "../filter/tags-filters";
 
 export const TimeTable: React.FC = () => {
   // dia siguiente al actual
@@ -39,24 +40,24 @@ export const TimeTable: React.FC = () => {
   const [openEditDialog, setOpenEditDialog] = React.useState(false);
   const [editingUser, setEditingUser] = React.useState<IUser | null>(null);
 
-  const timeBlocks = useTimeBlockStore((state) => state.timeBlocks);
+  const bookings = useBookingStore((state) => state.bookings);
   const users = useUserStore((state) => state.users);
 
   const userColors = React.useMemo(() => generateUserColors(users), [users]);
 
-  const filteredTimeBlocks = timeBlocks.filter(
-    (block) => new Date(block.startTime).toDateString() === date.toDateString()
+  const filteredBookings = bookings.filter(
+    (booking) => new Date(booking.startTime).toDateString() === date.toDateString()
   );
 
-  const handleEdit = (timeBlock: ITimeBlock) => {
-    const user = getUserByPhoneNumber(timeBlock.userId, users);
+  const handleEdit = (booking: IBooking) => {
+    const user = getUserByPhoneNumber(booking.userId, users);
     if (user) {
       setEditingUser(user);
       setOpenEditDialog(true);
     }
   };
 
-  // Sacar estas funciones aparte, para solo llamar una funcion que maneja los errores y 
+  // Sacar estas funciones aparte, para solo llamar una funcion que maneja los errores y
   // los mensajes de exito
   const onHandleEditUser = (values: any) => {
     try {
@@ -87,7 +88,7 @@ export const TimeTable: React.FC = () => {
 
               // Eliminar todos los bloques de tiempo asociado a ese usuario
               const phoneNumerDelete = users.find((user) => user.id === value);
-              deleteAllTimeBlocksByUserService(phoneNumerDelete!.phone!);
+              deleteAllBookingsByUserService(phoneNumerDelete!.phone!);
               if (confirmSaveData) {
                 toast({
                   title: "Éxito",
@@ -109,50 +110,57 @@ export const TimeTable: React.FC = () => {
     });
   };
 
-  const filteredBlocksByUser = React.useMemo(() => {
-    const blockTimesUsers = selectedUser
-      ? filteredTimeBlocks.filter((block) => block.userId === selectedUser)
-      : filteredTimeBlocks;
+  const filteredBookingsByUser = React.useMemo(() => {
+    const bookingsUsers = selectedUser
+      ? filteredBookings.filter((booking) => booking.userId === selectedUser)
+      : filteredBookings;
 
-    return blockTimesUsers;
-  }, [selectedUser, filteredTimeBlocks]);
+    return bookingsUsers;
+  }, [selectedUser, filteredBookings]);
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="space-y-4 w-full px-2 overflow-auto">
+      
+      <div className="hidden max-sm:block">
+        <TagsFilters />
+      </div>
 
-      <Select onValueChange={(value) => setSelectedUser(value)}>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Select a user" />
-        </SelectTrigger>
-        <SelectContent>
-          {users.map((user) => (
-            <SelectItem key={user.id} value={user.phone}>
-              {user.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="flex flex-wrap justify-between sm:sticky top-0 items-center bg-white rounded-sm p-1 my-1">
+        <span className="px-2 text-sm">Buscar por usuario</span>
+        <Select onValueChange={(value) => setSelectedUser(value)}>
+          <SelectTrigger className="flex-1 text-xs">
+            <SelectValue placeholder="Selecciona un usuario" />
+          </SelectTrigger>
+          <SelectContent>
+            {users.map((user) => (
+              <SelectItem key={user.id} value={user.phone}>
+                {user.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead>
+      <table className="min-w-full">
+        <thead className="sticky top-10 max-sm:top-0">
           <tr>
-            <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 bg-accent text-left text-xs font-medium uppercase tracking-wider">
               Hora
             </th>
-            <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 bg-accent text-left text-xs font-medium uppercase tracking-wider">
               Reserva
             </th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-white divide-y divide-gray-200 overflow-auto">
           {hours.map((hour) => {
-            const timeBlock = filteredBlocksByUser.find(
-              (block) =>
-                new Date(block.startTime).getHours() ===
+            const bookingsByUser = filteredBookingsByUser.find(
+              (booking) =>
+                new Date(booking.startTime).getHours() ===
                 parseInt(hour.split(":")[0])
             );
-            const user = timeBlock
-              ? getUserByPhoneNumber(timeBlock.userId, users)
+            const user = bookingsByUser
+              ? getUserByPhoneNumber(bookingsByUser.userId, users)
               : null;
             return (
               <tr key={hour}>
@@ -162,7 +170,7 @@ export const TimeTable: React.FC = () => {
                 <td className="flex justify-between gap-2 items-center md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <UserReservation
                     user={user}
-                    timeBlock={timeBlock}
+                    booking={bookingsByUser}
                     userColors={userColors}
                     handleEdit={handleEdit}
                     onHandleDelete={onHandleDelete}

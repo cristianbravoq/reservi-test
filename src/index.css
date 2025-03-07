@@ -4,70 +4,59 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%; /* Light silver background */
-    --foreground: 0 0% 20%; /* Dark zinc foreground */
-    --card: 0 0% 95%; /* Light silver card */
-    --card-foreground: 0 0% 20%; /* Dark zinc card foreground */
-    --popover: 0 0% 95%; /* Light silver popover */
-    --popover-foreground: 0 0% 20%; /* Dark zinc popover foreground */
-    --primary: 0 0% 40%; /* Primary zinc */
+    --background: 0, 0%, 100%; /* Light silver background */
+    --foreground: 270 30% 20%; /* Dark zinc foreground */
+    --card: 270 40% 95%; /* Light silver card */
+    --card-foreground: 270 30% 20%; /* Dark zinc card foreground */
+    --popover: 270 40% 95%; /* Light silver popover */
+    --popover-foreground: 270 30% 20%; /* Dark zinc popover foreground */
+    --primary: 270 40% 50%; /* Primary zinc */
     --primary-foreground: 0 0% 98%; /* White foreground */
-    --secondary: 0 0% 90%; /* Light silver secondary */
-    --secondary-foreground: 0 0% 20%; /* Dark zinc secondary foreground */
-    --muted: 0 0% 90%; /* Light silver muted */
-    --muted-foreground: 0 0% 20%; /* Dark zinc muted foreground */
-    --accent: 0 0% 90%; /* Light silver accent */
-    --accent-foreground: 0 0% 20%; /* Dark zinc accent foreground */
+    --secondary: 270 40% 90%; /* Light silver secondary */
+    --secondary-foreground: 270 30% 20%; /* Dark zinc secondary foreground */
+    --muted: 270 40% 90%; /* Light silver muted */
+    --muted-foreground: 270 30% 20%; /* Dark zinc muted foreground */
+    --accent: 34, 100%, 92%; /* Light silver accent */
+    --accent-foreground: 270 30% 20%; /* Dark zinc accent foreground */
     --destructive: 0 84.2% 60.2%; /* Red destructive */
     --destructive-foreground: 0 0% 98%; /* White destructive foreground */
-    --border: 0 0% 85%; /* Light silver border */
-    --input: 0 0% 85%; /* Light silver input */
-    --ring: 0 0% 50%; /* Zinc ring */
-    --chart-1: 0 0% 50%; /* Zinc chart 1 */
-    --chart-2: 0 0% 45%; /* Zinc chart 2 */
-    --chart-3: 0 0% 55%; /* Zinc chart 3 */
-    --chart-4: 0 0% 60%; /* Zinc chart 4 */
-    --chart-5: 0 0% 55%; /* Zinc chart 5 */
+    --border: 270 40% 85%; /* Light silver border */
+    --input: 270 40% 85%; /* Light silver input */
+    --ring: 270 40% 50%; /* Zinc ring */
+    --chart-1: 270 40% 50%; /* Zinc chart 1 */
+    --chart-2: 270 40% 45%; /* Zinc chart 2 */
+    --chart-3: 270 40% 55%; /* Zinc chart 3 */
+    --chart-4: 270 40% 60%; /* Zinc chart 4 */
+    --chart-5: 270 40% 55%; /* Zinc chart 5 */
     --radius: 0.5rem; /* Border radius */
   }
   .dark {
-    --background: 0 0% 10%; /* Dark zinc background */
-    --foreground: 0 0% 90%; /* Light silver foreground */
-    --card: 0 0% 10%; /* Dark zinc card */
-    --card-foreground: 0 0% 90%; /* Light silver card foreground */
-    --popover: 0 0% 10%; /* Dark zinc popover */
-    --popover-foreground: 0 0% 90%; /* Light silver popover foreground */
-    --primary: 0 0% 40%; /* Primary zinc */
+    --background: 270 30% 10%; /* Dark zinc background */
+    --foreground: 270 40% 90%; /* Light silver foreground */
+    --card: 270 30% 10%; /* Dark zinc card */
+    --card-foreground: 270 40% 90%; /* Light silver card foreground */
+    --popover: 270 30% 10%; /* Dark zinc popover */
+    --popover-foreground: 270 40% 90%; /* Light silver popover foreground */
+    --primary: 270 40% 50%; /* Primary zinc */
     --primary-foreground: 0 0% 100%; /* White foreground */
-    --secondary: 0 0% 20%; /* Dark zinc secondary */
-    --secondary-foreground: 0 0% 90%; /* Light silver secondary foreground */
-    --muted: 0 0% 20%; /* Dark zinc muted */
-    --muted-foreground: 0 0% 90%; /* Light silver muted foreground */
-    --accent: 0 0% 20%; /* Dark zinc accent */
-    --accent-foreground: 0 0% 90%; /* Light silver accent foreground */
+    --secondary: 270 30% 20%; /* Dark zinc secondary */
+    --secondary-foreground: 270 40% 90%; /* Light silver secondary foreground */
+    --muted: 270 30% 20%; /* Dark zinc muted */
+    --muted-foreground: 270 40% 90%; /* Light silver muted foreground */
+    --accent: 270 30% 20%; /* Dark zinc accent */
+    --accent-foreground: 270 40% 90%; /* Light silver accent foreground */
     --destructive: 0 62.8% 30.6%; /* Dark red destructive */
     --destructive-foreground: 0 0% 100%; /* White destructive foreground */
-    --border: 0 0% 20%; /* Dark zinc border */
-    --input: 0 0% 20%; /* Dark zinc input */
-    --ring: 0 0% 50%; /* Zinc ring */
-    --chart-1: 0 0% 50%; /* Zinc chart 1 */
-    --chart-2: 0 0% 45%; /* Zinc chart 2 */
-    --chart-3: 0 0% 55%; /* Zinc chart 3 */
-    --chart-4: 0 0% 60%; /* Zinc chart 4 */
-    --chart-5: 0 0% 55%; /* Zinc chart 5 */
+    --border: 270 30% 20%; /* Dark zinc border */
+    --input: 270 30% 20%; /* Dark zinc input */
+    --ring: 270 40% 50%; /* Zinc ring */
+    --chart-1: 270 40% 50%; /* Zinc chart 1 */
+    --chart-2: 270 40% 45%; /* Zinc chart 2 */
+    --chart-3: 270 40% 55%; /* Zinc chart 3 */
+    --chart-4: 270 40% 60%; /* Zinc chart 4 */
+    --chart-5: 270 40% 55%; /* Zinc chart 5 */
   }
 }
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
-
 
 @layer base {
   * {
@@ -76,4 +65,33 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Estilos generales para el scrollbar */
+::-webkit-scrollbar {
+  width: 8px; /* Ancho del scrollbar */
+  height: 6px;
+}
+
+/* Estilos para la barra del scrollbar */
+::-webkit-scrollbar-thumb {
+  background: hsl(270 40% 50%); /* Color del thumb del scrollbar */
+  border-radius: 4px; /* Bordes redondeados */
+}
+
+/* Estilos para la barra del scrollbar al pasar el mouse sobre él */
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(270, 84%, 75%); /* Color del thumb al hacer hover */
+}
+
+/* Estilos para la barra del scrollbar en posición normal */
+::-webkit-scrollbar-track {
+  background: hsl(35, 89%, 89%); /* Color del track del scrollbar */
+  border-radius: 4px; /* Bordes redondeados */
+  margin: 12px;
+}
+
+/* Estilos para la barra del scrollbar en posición normal */
+::-webkit-scrollbar-track:hover {
+  background: hsl(34, 100%, 92%); /* Color del track al hacer hover */
 }

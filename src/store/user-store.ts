@@ -8,7 +8,6 @@ interface UserState {
   addUser: (user: IUser) => boolean;
   editUser: (updatedUser: IUser) => boolean;
   deleteUser: (userId: string) => boolean;
-  getUsers: () => IUser[];
   usersRef: React.MutableRefObject<IUser[]>;
 }
 
@@ -46,7 +45,6 @@ const useUserStore = create<UserState>()(
           set({ users: newUsers });
           return true;
         },
-        getUsers: () => get().users,
         usersRef,
       };
     },

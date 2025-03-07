@@ -2,8 +2,8 @@ import useUserStore from "@/store/user-store";
 import { IUser } from "../types/user";
 
 const getUsersService = () => {
-  const getUsers = useUserStore.getState().getUsers;
-  return getUsers();
+  const users = useUserStore.getState().users;
+  return users;
 };
 
 const addUserService = (user: IUser) => {

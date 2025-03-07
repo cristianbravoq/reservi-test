@@ -1,7 +1,8 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -13,20 +14,19 @@ import {
 } from "@/components/ui/form";
 import { Calendar } from "@/components/ui/calendar";
 import { TimePicker } from "@/components/ui/time-picker";
-import { addTimeBlockService } from "@/services/time-blocks.service";
-import { CalendarIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { IUser } from "@/types/user";
-import { ITimeBlock } from "@/types/time-blocks";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { toast } from "@/hooks/use-toast";
+
 import useUserStore from "@/store/user-store";
 
 // Definir el esquema de validación con zod
@@ -38,16 +38,14 @@ const formSchema = z.object({
   date: z.date(),
 });
 
-export const TimeBlockForm: React.FC = () => {
-  const [startHour, setStartHour] = useState<string>("00:00");
-  const [endHour, setEndHour] = useState<string>("01:00");
+export const BookingForm: React.FC = () => {
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const users = useUserStore((state) => state.users);
 
   const [filteredSuggestions, setFilteredSuggestions] = useState<IUser[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [inputValue, setInputValue] = useState("");
+  const [bookingPhone, setBookingPhone] = useState("");
 
   // Configurar useForm con el esquema de validación y valores por defecto
   const form = useForm<z.infer<typeof formSchema>>({
@@ -61,9 +59,14 @@ export const TimeBlockForm: React.FC = () => {
     },
   });
 
+  const isDateDisabled = (date: Date) => {
+    const today = new Date();
+    return date < today;
+  };
+
   // Actualizar los usuarios con el componente de autocompletar cada vez que cambie form.setValue("userId", value)
-  const handleSuggestions = (value: string) => {
-    setInputValue(value);
+  const handleUserSuggestions = (value: string) => {
+    setBookingPhone(value);
     setShowSuggestions(true);
 
     setFilteredSuggestions(
@@ -71,90 +74,15 @@ export const TimeBlockForm: React.FC = () => {
     ); // Devolver todas las coincidencias de los usuarios
   };
 
-  const handleShowsSuggestions = (value: string) => {
-    form.setValue("userId", value);
-    setInputValue(value);
+  const handleShowUserSuggestions = (userId: string, userPhone: string) => {
+    form.setValue("userId", userId);
+    setBookingPhone(userPhone);
     setShowSuggestions(false);
-  };
-
-  const isDateDisabled = (date: Date) => {
-    const today = new Date();
-    return date < today;
-  };
-
-  const handleStartTimeChange = (e: string) => {
-    setStartHour(e);
-    const [hours, minutes] = e.split(":").map(Number);
-    const newEndHour = new Date();
-    newEndHour.setHours(hours + 1, minutes);
-    const formattedEndHour = newEndHour.toTimeString().slice(0, 5);
-    setEndHour(formattedEndHour);
-    form.setValue("startTime", e);
-    form.setValue("endTime", formattedEndHour);
-  };
-
-  const handleEndTimeChange = (e: string) => {
-    setEndHour(e);
-    const [hours, minutes] = e.split(":").map(Number);
-    const newStartHour = new Date();
-    newStartHour.setHours(hours - 1, minutes);
-    const formattedStartHour = newStartHour.toTimeString().slice(0, 5);
-    setStartHour(formattedStartHour);
-    form.setValue("endTime", e);
-    form.setValue("startTime", formattedStartHour);
   };
 
   // Función para manejar el envío del formulario
   const onSubmit = () => {
-    // Validar que exista un usuario real vinculado al número de teléfono
-    const user = users.find((user) => user.phone === inputValue);
-    if (!user) {
-      toast({
-        title: "Error",
-        description: "User not found.",
-      });
-      return;
-    }
-
-    const startHourTime = form.getValues("startTime");
-    const endHourTime = form.getValues("endTime");
-    // Convertir las horas en un string de tipo date date "2025-02-06T03:00:00.000Z"
-    const startTime = new Date(
-      `${selectedDate!.toISOString().split("T")[0]}T${startHourTime}`
-    );
-    const endTime = new Date(
-      `${selectedDate!.toISOString().split("T")[0]}T${endHourTime}`
-    );
-
-    const date = form.getValues("date");
-    const userId = inputValue;
-
-    const timeBlock: ITimeBlock = {
-      userId,
-      startTime,
-      endTime,
-      date,
-      id: crypto.randomUUID(),
-    };
-    addTimeBlockService(timeBlock);
-
-    // Limpiar el formulario después de enviar
-    form.reset();
-    // Limpiar los error de validacion
-    form.clearErrors();
-
-    // quiero setear los valores a una hora mas de la actual guardada en el state si el valor es
-    console.log("startHour", startHour);
-
-    setSelectedDate(undefined);
-    setInputValue("");
-    setFilteredSuggestions([]);
-    setShowSuggestions(false);
-
-    toast({
-      title: "Success",
-      description: "Time block created successfully.",
-    });
+    
   };
 
   return (
@@ -170,20 +98,20 @@ export const TimeBlockForm: React.FC = () => {
                 <div className="autocomplete">
                   <Input
                     type="tel"
-                    onChange={(e) => handleSuggestions(e.target.value)}
-                    value={inputValue}
+                    onChange={(e) => handleUserSuggestions(e.target.value)}
+                    value={bookingPhone}
                   />
-                  {showSuggestions && inputValue && (
+                  {showSuggestions && bookingPhone && (
                     <ul className="w-auto">
                       {filteredSuggestions.length ? (
-                        filteredSuggestions.map((suggestion, index) => (
+                        filteredSuggestions.map((userSuggestion, index) => (
                           <Badge
                             key={index}
                             onClick={() =>
-                              handleShowsSuggestions(suggestion.phone)
+                              handleShowUserSuggestions(userSuggestion.id, userSuggestion.phone)
                             }
                           >
-                            {suggestion.name} - {suggestion.phone}
+                            {userSuggestion.name} - {userSuggestion.phone}
                           </Badge>
                         ))
                       ) : (
@@ -266,7 +194,7 @@ export const TimeBlockForm: React.FC = () => {
           </div>
         </FormItem>
 
-        <Button onClick={() => onSubmit()}>Assign Time Block</Button>
+        <Button onClick={() => onSubmit()}>Assign booking</Button>
       </form>
     </Form>
   );

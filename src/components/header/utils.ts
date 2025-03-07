@@ -1,5 +1,5 @@
 import { toast } from "@/hooks/use-toast";
-import { updateTimeBlockIWhenEditUsersService } from "@/services/time-blocks.service";
+import { updateBookingsWhenEditUserService } from "@/services/booking.service";
 import { addUserService, editUserService } from "@/services/user.service";
 import { IUser } from "@/types/user";
 
@@ -34,7 +34,7 @@ const handleEditUser = (values: IUser, users: IUser[]) => {
       handleCreateUser(values);
       console.log("usuario nuevo", values.phone, oldUser!.phone);
       // Asignar al nuevo usuario, las reservas asignadas al oldUser
-      updateTimeBlockIWhenEditUsersService(values.phone, oldUser!.phone);
+      updateBookingsWhenEditUserService(values.phone, oldUser!.phone);
 
       return;
     }
@@ -49,7 +49,7 @@ const handleEditUser = (values: IUser, users: IUser[]) => {
       });
     }
   } catch {
-    updateTimeBlockIWhenEditUsersService(values.phone, oldUser!.phone);
+    updateBookingsWhenEditUserService(values.phone, oldUser!.phone);
     toast({
       title: "Error",
       description: "Error editando el usuario",
