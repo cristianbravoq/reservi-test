@@ -27,33 +27,36 @@ const UserReservation: React.FC<UserReservationProps> = ({
   return (
     <>
       {user ? (
-        <div className="flex w-full justify-between gap-1 flex-wrap">
+        <div className="flex w-full justify-between gap-1 overflow-auto">
           <Badge
-            
+            className="text-nowrap"
             variant="outline"
             style={{
               backgroundColor: userColors[user.phone],
             }}
           >
             {user.name}
-          </Badge>
+          </Badge>-
           <Badge
+            className="text-nowrap"
             variant="outline"
             style={{
               backgroundColor: userColors[user.phone],
             }}
           >
             {user.address}
-          </Badge>
+          </Badge>-
           <Badge
+            className="text-nowrap"
             variant="outline"
             style={{
               backgroundColor: userColors[user.phone],
             }}
           >
             {user.phone}
-          </Badge>
+          </Badge>-
           <Badge
+            className="text-nowrap"
             variant="outline"
             style={{
               backgroundColor: userColors[user.phone],

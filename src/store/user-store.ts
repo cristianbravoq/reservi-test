@@ -8,12 +8,13 @@ interface UserState {
   addUser: (user: IUser) => boolean;
   editUser: (updatedUser: IUser) => boolean;
   deleteUser: (userId: string) => boolean;
-  usersRef: React.MutableRefObject<IUser[]>;
+  usersRef: { current: IUser[] }; // Simulamos un Ref sin React
 }
 
 const useUserStore = create<UserState>()(
   persist(
     (set, get) => {
+      // Inicializamos usersRef con una referencia a la lista de usuarios
       const usersRef = { current: [] as IUser[] };
 
       return {
@@ -23,38 +24,31 @@ const useUserStore = create<UserState>()(
         },
         addUser: (newUser: IUser) => {
           const { users } = get();
-
           const newUsers = [...users, newUser];
-          usersRef.current = newUsers;
 
-          set({ users: newUsers });
+          set({ users: newUsers, usersRef: {current: newUsers} });
 
           return true;
         },
         editUser: (updatedUser: IUser) => {
           const { users } = get();
-
           const newUsers = users.map((user) =>
             user.id === updatedUser.id ? updatedUser : user
           );
-          usersRef.current = newUsers;
 
-          set({ users: newUsers });
+          set({ users: newUsers, usersRef: {current: newUsers} });
 
           return true;
         },
         deleteUser: (userId: string) => {
           const { users } = get();
           const newUsers = users.filter((user) => user.id !== userId);
-          usersRef.current = newUsers;
 
-          set(() => ({
-            users: newUsers,
-          }));
-          
+          set({ users: newUsers, usersRef: {current: newUsers} });
+
           return true;
         },
-        usersRef,
+        usersRef, // Devolvemos usersRef
       };
     },
     {

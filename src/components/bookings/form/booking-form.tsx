@@ -209,7 +209,7 @@ export const BookingForm: React.FC = () => {
           <TimePicker onChange={handleTimeSlotChange} />
         </FormItem>
 
-        <Button type="submit">Assign booking</Button>
+        <Button type="submit">Crear reserva</Button>
       </form>
     </Form>
   );

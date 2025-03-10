@@ -10,6 +10,7 @@ import { FilterKeysType } from "./types";
 
 import useBookingsFilterStore from "@/store/filters-store";
 import useUserStore from "@/store/user-store";
+import { setUsersService } from "@/services/user.service";
 
 const filterOptions: FilterKeysType[] = ["name", "phone", "email"];
 
@@ -23,7 +24,7 @@ export const BookingsFilter: React.FC = () => {
     email: "",
   });
 
-  const { setUsers, usersRef } = useUserStore();
+  const { usersRef } = useUserStore();
   // useRef -> para guardar un valor
   // que queremos que se comparta entre renderizados
   // pero que al cambiar, no vuelva a renderizar el componente
@@ -65,11 +66,16 @@ export const BookingsFilter: React.FC = () => {
 
   const handleAddTag = (filterKey: FilterKeysType, filterValue: string) => {
     addTag(filterKey, filterValue);
+    // Limpiar input después de agregar el tag
+    setInputValues((prevValues) => ({
+      ...prevValues,
+      [filterKey]: "",
+    }));
   };
 
   useEffect(() => {
-    setUsers(filteredUsers);
-  }, [filteredUsers, setUsers]);
+    setUsersService(filteredUsers);
+  }, [filteredUsers]);
 
   return (
     <div className="w-full">
@@ -86,7 +92,7 @@ export const BookingsFilter: React.FC = () => {
             >
               <Input
                 className="rounded-r-none"
-                placeholder={`Filter by ${filter}`}
+                placeholder={`Filtrar por ${filter}`}
                 value={inputValues[filter]}
                 onChange={(e) => handleInputChange(e, filter)}
               />

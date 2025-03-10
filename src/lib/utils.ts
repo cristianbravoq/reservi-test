@@ -61,33 +61,13 @@ export const generateColor = (id: string): string => {
   return colors[colorIndex];
 };
 
-// Función para encontrar las reservas asociadas a una hora específica
-export const findBookingsForHour = (
-  bookings: IBooking[],
-  hour: number
-): IBooking[] => {
-  const startMinutes = hour * 60;
-  const endMinutes = (hour + 1) * 60;
-  return bookings.filter(
-    (booking) =>
-      booking.timeSlot.startMinutes < endMinutes &&
-      booking.timeSlot.endMinutes > startMinutes
-  );
-};
-
 // Función para calcular la posición y altura de una reserva dentro de una hora
-export const calculateBookingPosition = (
-  booking: IBooking,
-  hour: number
-): { top: number; height: number } => {
-  const startMinutes = hour * 60;
-  const endMinutes = (hour + 1) * 60;
+export const calculateBookingPosition = (booking: IBooking): { top: number; height: number } => {
+  const { startMinutes, endMinutes } = booking.timeSlot;
+  const totalMinutesInDay = 24 * 60;
 
-  const bookingStart = Math.max(booking.timeSlot.startMinutes, startMinutes);
-  const bookingEnd = Math.min(booking.timeSlot.endMinutes, endMinutes);
-
-  const top = ((bookingStart - startMinutes) / 60) * 100; // Porcentaje desde la parte superior
-  const height = ((bookingEnd - bookingStart) / 60) * 100; // Porcentaje de altura
+  const top = (startMinutes / totalMinutesInDay) * 100; // Posición relativa en %
+  const height = ((endMinutes - startMinutes) / totalMinutesInDay) * 100; // Altura relativa en %
 
   return { top, height };
 };
@@ -104,14 +84,22 @@ export const groupConsecutiveBookings = (bookings: IBooking[]): IBooking[] => {
   const groupedBookings: IBooking[] = [];
   let currentGroup: IBooking | null = null;
 
-  bookings.forEach((booking) => {
+  // Ordenar las reservas por hora de inicio
+  const sortedBookings = [...bookings].sort(
+    (a, b) => a.timeSlot.startMinutes - b.timeSlot.startMinutes
+  );
+
+  sortedBookings.forEach((booking) => {
     if (
       currentGroup &&
       currentGroup.userId === booking.userId &&
-      currentGroup.timeSlot.endMinutes === booking.timeSlot.startMinutes
+      currentGroup.timeSlot.endMinutes >= booking.timeSlot.startMinutes
     ) {
-      // Extender el bloque actual
-      currentGroup.timeSlot.endMinutes = booking.timeSlot.endMinutes;
+      // Extender el bloque actual si las reservas se superponen o son consecutivas
+      currentGroup.timeSlot.endMinutes = Math.max(
+        currentGroup.timeSlot.endMinutes,
+        booking.timeSlot.endMinutes
+      );
     } else {
       // Crear un nuevo bloque
       if (currentGroup) groupedBookings.push(currentGroup);

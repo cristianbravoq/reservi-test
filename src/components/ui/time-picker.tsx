@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { VerticalSlider } from "./vertical-slider";
 import { ITimeSlot } from "@/types/booking";
 
@@ -27,7 +27,6 @@ export const TimePicker = ({ onChange, timeSlot }: TimePickerProps) => {
 
   const timeOptions = generateTimeOptions();
 
-  // Manejar cambio en la hora inicial
   const handleStartTimeChange = (minutes: number) => {
     setStartTime(minutes);
     if (minutes >= endTime) {
@@ -39,20 +38,24 @@ export const TimePicker = ({ onChange, timeSlot }: TimePickerProps) => {
     }
   };
 
-  // Manejar cambio en la hora final
   const handleEndTimeChange = (minutes: number) => {
     setEndTime(minutes);
     onChange({ startMinutes: startTime, endMinutes: minutes });
   };
 
-  // Filtrar opciones de hora final para que sean superiores a la hora inicial
   const filteredEndTimeOptions = timeOptions.filter(
     (minutes) => minutes > startTime
   );
 
+  // Solo al montar el componente debe retornar un primer valor de tiempo
+  useEffect(() => {
+    onChange({ startMinutes: startTime, endMinutes: endTime });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="flex w-full justify-evenly">
-      {/* Deslizador para la hora inicial */}
+
       <div className="flex flex-col items-center">
         <label className="font-light text-sm">Hora Inicial</label>
         <VerticalSlider
@@ -62,7 +65,6 @@ export const TimePicker = ({ onChange, timeSlot }: TimePickerProps) => {
         />
       </div>
 
-      {/* Deslizador para la hora final */}
       <div className="flex flex-col items-center">
         <label className="font-light text-sm">Hora Final</label>
         <VerticalSlider
