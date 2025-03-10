@@ -1,5 +1,4 @@
-
-import { BookingsList } from "./components/bookings/time-table";
+import { BookingsList } from "./components/bookings/booking-list";
 import { BookingHeader } from "./components/header/booking-header";
 import { Toaster } from "./components/ui/toaster";
 
