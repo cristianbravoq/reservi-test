@@ -3,7 +3,11 @@ import useBookingStore from "@/store/booking-store";
 import { toast } from "@/hooks/use-toast";
 import { isOverlapping } from "@/lib/utils";
 
-const addBookingService = (newBooking: IBooking) => {
+const getBookingsService = (): Record<string, IBooking[]> => {
+  return useBookingStore.getState().bookings;
+}
+
+const addBookingService = (newBooking: Omit<IBooking, "id"> ) => {
   const { bookings, addBooking } = useBookingStore.getState();
   const existingBookings = bookings[newBooking.date] || [];
 
@@ -21,10 +25,15 @@ const addBookingService = (newBooking: IBooking) => {
       title: "Error",
       description: "Este horario ya no está disponible",
     });
-    return false;
+    throw new Error("Overlapping booking");
   }
 
-  addBooking(newBooking);
+  const bookingWithId: IBooking = {
+    ...newBooking,
+    id: Math.random().toString(36).substr(2, 9),
+  };
+
+  addBooking(bookingWithId);
   toast({
     title: "Éxito",
     description: "Reserva añadida con éxito.",
@@ -57,4 +66,4 @@ const getBookingsByDateService = (date: string): IBooking[] => {
   return getBookingsByDate(date);
 };
 
-export { addBookingService, editBookingService, deleteBookingService, getBookingsByDateService };
+export { getBookingsService, addBookingService, editBookingService, deleteBookingService, getBookingsByDateService };

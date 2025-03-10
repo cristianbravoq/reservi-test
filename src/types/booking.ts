@@ -5,7 +5,7 @@ export interface IBooking {
   timeSlot: ITimeSlot;
 }
 
-interface ITimeSlot {
+export interface ITimeSlot {
   startMinutes: number;
   endMinutes: number;
 }

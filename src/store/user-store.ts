@@ -21,28 +21,37 @@ const useUserStore = create<UserState>()(
         setUsers: (users: IUser[]) => {
           set({ users });
         },
-        addUser: (user: IUser) => {
-          const users = get().users;
-          if (users.some((u) => u.phone === user.phone)) {
-            return false;
-          }
-          const newUsers = [...users, user];
+        addUser: (newUser: IUser) => {
+          const { users } = get();
+
+          const newUsers = [...users, newUser];
           usersRef.current = newUsers;
+
           set({ users: newUsers });
+
           return true;
         },
         editUser: (updatedUser: IUser) => {
-          const newUsers = get().users.map((user) =>
-            user.phone === updatedUser.phone ? updatedUser : user
+          const { users } = get();
+
+          const newUsers = users.map((user) =>
+            user.id === updatedUser.id ? updatedUser : user
           );
           usersRef.current = newUsers;
+
           set({ users: newUsers });
+
           return true;
         },
         deleteUser: (userId: string) => {
-          const newUsers = get().users.filter((user) => user.id !== userId);
+          const { users } = get();
+          const newUsers = users.filter((user) => user.id !== userId);
           usersRef.current = newUsers;
-          set({ users: newUsers });
+
+          set(() => ({
+            users: newUsers,
+          }));
+          
           return true;
         },
         usersRef,

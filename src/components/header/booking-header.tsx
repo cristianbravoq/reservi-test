@@ -20,8 +20,9 @@ import {
 import { CreateUserForm } from "../user/form/user-form";
 import { BookingForm } from "../bookings/form/booking-form";
 import { BookingsFilter } from "../filter/bookings-filter";
-import { handleCreateUser } from "./utils";
 import { TagsFilters } from "../filter/tags-filters";
+import { addUserService } from "@/services/user.service";
+import { IUser } from "@/types/user";
 
 export const BookingHeader: React.FC = () => {
   const [openDialog1, setOpenDialog1] = React.useState(false);
@@ -30,8 +31,8 @@ export const BookingHeader: React.FC = () => {
 
   const date = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-  const onHandleCreateUser = (values: any) => {
-    handleCreateUser(values);
+  const onHandleCreateUser = (values: Omit<IUser, "id">) => {
+    addUserService(values);
   };
 
   return (
@@ -81,7 +82,7 @@ export const BookingHeader: React.FC = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Crear usuario</DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-left">
                 Complete el formulario para crear un nuevo usuario.
               </DialogDescription>
             </DialogHeader>
@@ -94,7 +95,7 @@ export const BookingHeader: React.FC = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Asignar reserva</DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-left">
                 Complete el formulario para asignar un bloque de tiempo.
               </DialogDescription>
             </DialogHeader>

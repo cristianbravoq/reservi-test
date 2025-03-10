@@ -14,15 +14,14 @@ interface UserReservationProps {
   user: IUser | null;
   booking: IBooking | undefined;
   userColors: Record<string, string>;
-  handleEdit: (booking: IBooking) => void;
+  onHandleEdit: (user: IUser) => void;
   onHandleDelete: (userId: string) => void;
 }
 
 const UserReservation: React.FC<UserReservationProps> = ({
   user,
-  booking,
   userColors,
-  handleEdit,
+  onHandleEdit,
   onHandleDelete,
 }) => {
   return (
@@ -30,6 +29,7 @@ const UserReservation: React.FC<UserReservationProps> = ({
       {user ? (
         <div className="flex w-full justify-between gap-1 flex-wrap">
           <Badge
+            
             variant="outline"
             style={{
               backgroundColor: userColors[user.phone],
@@ -65,11 +65,11 @@ const UserReservation: React.FC<UserReservationProps> = ({
       ) : (
         "No Reservation"
       )}
-      {booking && (
+      {user && (
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="icon">
-              <MoreVertical className="h-3 w-3 m-2" />
+            <Button variant="ghost" size="sm">
+              <MoreVertical className="" />
             </Button>
           </PopoverTrigger>
           <PopoverContent align="end" className="w-32 flex flex-col gap-2">
@@ -77,7 +77,7 @@ const UserReservation: React.FC<UserReservationProps> = ({
               variant="default"
               size="default"
               className="w-full"
-              onClick={() => handleEdit(booking)}
+              onClick={() => onHandleEdit(user)}
             >
               Editar
             </Button>

@@ -23,23 +23,23 @@ import {
 } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { cn, isDateDisabled } from "@/lib/utils";
 import { format } from "date-fns";
 import { IUser } from "@/types/user";
+import { ITimeSlot } from "@/types/booking";
 
 import useUserStore from "@/store/user-store";
+import { addBookingService } from "@/services/booking.service";
 
 // Definir el esquema de validación con zod
 const formSchema = z.object({
-  id: z.string().uuid({ message: "Invalid ID format." }),
   startTime: z.string().min(1, { message: "Start time is required." }),
   endTime: z.string().min(1, { message: "End time is required." }),
   userId: z.string().min(1, { message: "User phone is required." }),
-  date: z.date(),
+  date: z.string(),
 });
 
 export const BookingForm: React.FC = () => {
-
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const users = useUserStore((state) => state.users);
 
@@ -51,7 +51,6 @@ export const BookingForm: React.FC = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      id: "",
       date: undefined,
       startTime: "",
       endTime: "",
@@ -59,19 +58,23 @@ export const BookingForm: React.FC = () => {
     },
   });
 
-  const isDateDisabled = (date: Date) => {
-    const today = new Date();
-    return date < today;
-  };
-
   // Actualizar los usuarios con el componente de autocompletar cada vez que cambie form.setValue("userId", value)
   const handleUserSuggestions = (value: string) => {
+    if (!value) {
+      setBookingPhone("");
+      form.setValue("userId", "");
+      setShowSuggestions(false);
+      return;
+    }
+
     setBookingPhone(value);
     setShowSuggestions(true);
 
     setFilteredSuggestions(
       users.filter((user: IUser) => user.phone.includes(value))
-    ); // Devolver todas las coincidencias de los usuarios
+    );
+
+    form.clearErrors();
   };
 
   const handleShowUserSuggestions = (userId: string, userPhone: string) => {
@@ -80,9 +83,41 @@ export const BookingForm: React.FC = () => {
     setShowSuggestions(false);
   };
 
+  const handleTimeSlotChange = (timeSlot: ITimeSlot) => {
+    form.setValue("startTime", timeSlot.startMinutes.toString());
+    form.setValue("endTime", timeSlot.endMinutes.toString());
+
+    form.clearErrors();
+  };
+
+  const handleChangeDate = (e: Date | undefined) => {
+    setSelectedDate(e);
+    if (e) {
+      form.setValue("date", e.toString());
+    }
+
+    form.clearErrors();
+  };
+
   // Función para manejar el envío del formulario
-  const onSubmit = () => {
-    
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
+    try {
+      const bookingData = {
+        ...data,
+        timeSlot: {
+          startMinutes: parseInt(data.startTime),
+          endMinutes: parseInt(data.endTime),
+        },
+      };
+      addBookingService(bookingData);
+
+      setBookingPhone("");
+      setShowSuggestions(false);
+      setSelectedDate(undefined);
+      form.reset();
+    } catch {
+      // Manejar errores
+    } 
   };
 
   return (
@@ -108,7 +143,10 @@ export const BookingForm: React.FC = () => {
                           <Badge
                             key={index}
                             onClick={() =>
-                              handleShowUserSuggestions(userSuggestion.id, userSuggestion.phone)
+                              handleShowUserSuggestions(
+                                userSuggestion.id,
+                                userSuggestion.phone
+                              )
                             }
                           >
                             {userSuggestion.name} - {userSuggestion.phone}
@@ -155,12 +193,7 @@ export const BookingForm: React.FC = () => {
                     mode="single"
                     className=""
                     selected={selectedDate}
-                    onSelect={(e) => {
-                      setSelectedDate(e);
-                      if (e) {
-                        form.setValue("date", e);
-                      }
-                    }}
+                    onSelect={(e) => handleChangeDate(e)}
                     initialFocus
                     disabled={isDateDisabled}
                   />
@@ -171,30 +204,12 @@ export const BookingForm: React.FC = () => {
           )}
         />
 
-        <FormItem className="grid grid-flow-col">
-          <div className="flex flex-col gap-2 items-center justify-center !m-0">
-            <FormLabel>Hora inicial</FormLabel>
-            <FormControl>
-              <TimePicker
-                className=""
-                onSelect={handleStartTimeChange}
-                value={startHour}
-              />
-            </FormControl>
-          </div>
-          <div className="flex flex-col gap-2 items-center justify-center !m-0">
-            <FormLabel>Hora Final</FormLabel>
-            <FormControl>
-              <TimePicker
-                className=""
-                onSelect={handleEndTimeChange}
-                value={endHour}
-              />
-            </FormControl>
-          </div>
+        <FormItem className="flex flex-col gap-4">
+          <FormLabel>Seleccionar intervalo de tiempo</FormLabel>
+          <TimePicker onChange={handleTimeSlotChange} />
         </FormItem>
 
-        <Button onClick={() => onSubmit()}>Assign booking</Button>
+        <Button type="submit">Assign booking</Button>
       </form>
     </Form>
   );

@@ -12,6 +12,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { IUser } from "@/types/user";
 
 // Definir el esquema de validación con zod
 const formSchema = z.object({
@@ -26,8 +27,8 @@ const formSchema = z.object({
 });
 
 interface CreateUserFormProps {
-  initialValues?: z.infer<typeof formSchema>;
-  onSubmit: (values: z.infer<typeof formSchema>) => void;
+  initialValues?: Omit<IUser, "id">;
+  onSubmit: (values: Omit<IUser, "id">) => void;
 }
 
 export const CreateUserForm: React.FC<CreateUserFormProps> = ({
@@ -35,7 +36,7 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
   onSubmit,
 }) => {
   // Configurar useForm con el esquema de validación y valores por defecto
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<Omit<IUser, "id">>({
     resolver: zodResolver(formSchema),
     defaultValues: initialValues || {
       name: "",
@@ -45,7 +46,7 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
     },
   });
 
-  const handleSubmit = (values: z.infer<typeof formSchema>) => {
+  const handleSubmit = (values: Omit<IUser, "id">) => {
     form.reset();
     onSubmit(values);
   };

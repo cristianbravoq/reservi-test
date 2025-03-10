@@ -1,28 +1,15 @@
-import * as React from "react";
-
-import { hours } from "@/lib/format-hours";
-
-import useBookingStore from "@/store/booking-store";
-import useUserStore from "@/store/user-store";
-
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-
-import { toast } from "@/hooks/use-toast";
-import { CreateUserForm } from "@/components/user/form/user-form";
-import { handleEditUser } from "@/components/header/utils";
-import { deleteUserService } from "@/services/user.service";
-import { deleteAllBookingsByUserService } from "@/services/booking.service";
-import { generateUserColors } from "@/lib/generate-row-colors";
+  calculateBookingPosition,
+  findBookingsForHour,
+  findUserForBooking,
+  generateColor,
+  groupConsecutiveBookings,
+  minutesToTime,
+} from "@/lib/utils";
 import UserReservation from "../user/user-reservation";
+import { useState } from "react";
+import { TagsFilters } from "../filter/tags-filters";
 import { IUser } from "@/types/user";
-import { IBooking } from "@/types/booking";
-import { getUserByPhoneNumber } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -30,97 +17,59 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { TagsFilters } from "../filter/tags-filters";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import { CreateUserForm } from "../user/form/user-form";
+import useUserStore from "@/store/user-store";
+import useBookingStore from "@/store/booking-store";
 
-export const TimeTable: React.FC = () => {
-  // dia siguiente al actual
-  const date = new Date(Date.now() + 24 * 60 * 60 * 1000);
+export const BookingsList = () => {
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [editingUser, setEditingUser] = useState<IUser | null>(null);
+  const [selectedUser, setSelectedUser] = useState<string | undefined>();
 
-  const [selectedUser, setSelectedUser] = React.useState<string | undefined>();
-  const [openEditDialog, setOpenEditDialog] = React.useState(false);
-  const [editingUser, setEditingUser] = React.useState<IUser | null>(null);
-
-  const bookings = useBookingStore((state) => state.bookings);
+  // Suscribirse a los cambios en los stores
   const users = useUserStore((state) => state.users);
+  const bookings = useBookingStore((state) => state.bookings);
 
-  const userColors = React.useMemo(() => generateUserColors(users), [users]);
+  // Aplanar el objeto bookings a un array de reservas y agrupar reservas consecutivas
+  const allBookings = Object.values(bookings).flat();
+  const groupedBookings = groupConsecutiveBookings(allBookings);
 
-  const filteredBookings = bookings.filter(
-    (booking) => new Date(booking.startTime).toDateString() === date.toDateString()
-  );
+  // Generar las horas del día en intervalos de 1 hora
+  const timeSlots = Array.from({ length: 24 }, (_, i) => i); // 0, 1, 2, ..., 23
 
-  const handleEdit = (booking: IBooking) => {
-    const user = getUserByPhoneNumber(booking.userId, users);
-    if (user) {
-      setEditingUser(user);
-      setOpenEditDialog(true);
-    }
+  const handleEdit = (editUserEvent: IUser) => {
+    if (editUserEvent.id === undefined) return;
+    setEditingUser(editUserEvent);
+    setOpenEditDialog(true);
   };
 
-  // Sacar estas funciones aparte, para solo llamar una funcion que maneja los errores y
-  // los mensajes de exito
-  const onHandleEditUser = (values: any) => {
-    try {
-      handleEditUser(values, users);
-      setOpenEditDialog(false);
-
-      toast({
-        title: "Success",
-        description: "Usuario editado con éxito",
-      });
-    } catch {
-      toast({
-        title: "Error",
-        description: "Error al editar un usario",
-      });
-    }
+  const handleEditUser = (values: Omit<IUser, "id">) => {
+    const editUser = {
+      ...values,
+      id: editingUser!.id,
+    };
+    useUserStore.getState().editUser(editUser); // Actualizar el store
+    setOpenEditDialog(false);
   };
 
-  const onHandleDelete = (value: string) => {
-    toast({
-      title: "Eliminar Usuario",
-      description: "¿Estás seguro de que deseas eliminar este usuario?",
-      action: (
-        <button
-          onClick={async () => {
-            try {
-              const confirmSaveData = await deleteUserService(value);
-
-              // Eliminar todos los bloques de tiempo asociado a ese usuario
-              const phoneNumerDelete = users.find((user) => user.id === value);
-              deleteAllBookingsByUserService(phoneNumerDelete!.phone!);
-              if (confirmSaveData) {
-                toast({
-                  title: "Éxito",
-                  description: "Usuario eliminado con éxito",
-                });
-              }
-            } catch {
-              toast({
-                title: "Error",
-                description: "Hubo un problema al eliminar el usuario",
-              });
-            }
-          }}
-          className="bg-red-500 text-white px-4 py-2 rounded-md"
-        >
-          Confirmar
-        </button>
-      ),
-    });
+  const handleDeleteUser = (userId: string) => {
+    useUserStore.getState().deleteUser(userId); // Actualizar el store
   };
 
-  const filteredBookingsByUser = React.useMemo(() => {
-    const bookingsUsers = selectedUser
-      ? filteredBookings.filter((booking) => booking.userId === selectedUser)
-      : filteredBookings;
-
-    return bookingsUsers;
-  }, [selectedUser, filteredBookings]);
+  const userColors = users.reduce((acc, user) => {
+    acc[user.phone] = generateColor(user.id);
+    return acc;
+  }, {} as Record<string, string>);
 
   return (
     <div className="space-y-4 w-full px-2 overflow-auto">
-      
       <div className="hidden max-sm:block">
         <TagsFilters />
       </div>
@@ -141,46 +90,64 @@ export const TimeTable: React.FC = () => {
         </Select>
       </div>
 
-      <table className="min-w-full">
-        <thead className="sticky top-10 max-sm:top-0">
-          <tr>
-            <th className="px-6 py-3 bg-accent text-left text-xs font-medium uppercase tracking-wider">
-              Hora
-            </th>
-            <th className="px-6 py-3 bg-accent text-left text-xs font-medium uppercase tracking-wider">
-              Reserva
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200 overflow-auto">
-          {hours.map((hour) => {
-            const bookingsByUser = filteredBookingsByUser.find(
-              (booking) =>
-                new Date(booking.startTime).getHours() ===
-                parseInt(hour.split(":")[0])
-            );
-            const user = bookingsByUser
-              ? getUserByPhoneNumber(bookingsByUser.userId, users)
-              : null;
+      <div className="flex">
+        {/* Columna de horas */}
+        <div className="w-24 mr-4 text-right">
+          {timeSlots.map((hour) => (
+            <div
+              key={hour}
+              className="p-2 border-b border-gray-200 h-16 flex items-center justify-end"
+            >
+              {minutesToTime(hour * 60)}
+            </div>
+          ))}
+        </div>
+
+        {/* Columna de reservas */}
+        <div className="flex-1 overscroll-y-auto">
+          {timeSlots.map((hour) => {
+            const bookingsForHour = findBookingsForHour(groupedBookings, hour);
+
             return (
-              <tr key={hour}>
-                <td className="md:px-6 max-md:pl-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 max-md:text-xs">
-                  {hour}
-                </td>
-                <td className="flex justify-between gap-2 items-center md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <UserReservation
-                    user={user}
-                    booking={bookingsByUser}
-                    userColors={userColors}
-                    handleEdit={handleEdit}
-                    onHandleDelete={onHandleDelete}
-                  />
-                </td>
-              </tr>
+              <div
+                key={hour}
+                className="p-2 border-b border-gray-200 h-16 relative"
+              >
+                {bookingsForHour.map((booking) => {
+                  const user = findUserForBooking(users, booking);
+                  if (!user) return null;
+
+                  const { top, height } = calculateBookingPosition(
+                    booking,
+                    hour
+                  );
+
+                  return (
+                    <div
+                      key={booking.id}
+                      className={`absolute flex left-0 right-0 ${generateColor(
+                        booking.userId
+                      )} p-2 rounded`}
+                      style={{
+                        top: `${top}%`,
+                        height: `${height}%`,
+                      }}
+                    >
+                      <UserReservation
+                        user={user}
+                        booking={booking}
+                        userColors={userColors}
+                        onHandleEdit={handleEdit}
+                        onHandleDelete={handleDeleteUser}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
             );
           })}
-        </tbody>
-      </table>
+        </div>
+      </div>
 
       {/* Dialog para editar usuario */}
       <Dialog open={openEditDialog} onOpenChange={setOpenEditDialog}>
@@ -193,7 +160,7 @@ export const TimeTable: React.FC = () => {
           </DialogHeader>
           <CreateUserForm
             initialValues={editingUser!}
-            onSubmit={onHandleEditUser}
+            onSubmit={handleEditUser}
           />
         </DialogContent>
       </Dialog>
