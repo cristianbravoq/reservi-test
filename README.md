@@ -1,50 +1,65 @@
-# React + TypeScript + Vite
+# Reservi
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Reservi es una aplicación para gestionar reservas y usuarios. Este README proporciona instrucciones para instalar el repositorio, usar los filtros, crear un usuario y crear una reserva.
 
-Currently, two official plugins are available:
+## Instalación
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Sigue estos pasos para instalar el repositorio en tu máquina local:
 
-## Expanding the ESLint configuration
+1. Clona el repositorio:
+    ```bash
+    git clone https://github.com/cristianbravoq/reservi-test/
+    ```
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+2. Navega al directorio del proyecto:
+    ```bash
+    cd reservi
+    ```
 
-- Configure the top-level `parserOptions` property like this:
+3. Instala las dependencias:
+    ```bash
+    npm install
+    ```
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+4. Inicia la aplicación:
+    ```bash
+    npm start
+    ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## Uso de los Filtros
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+La aplicación permite filtrar usuarios por nombre, teléfono y correo electrónico. Sigue estos pasos para usar los filtros:
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+1. En la página principal, verás un conjunto de campos de entrada para filtrar usuarios.
+2. Ingresa el valor que deseas filtrar en el campo correspondiente (nombre, teléfono o correo electrónico).
+3. Haz clic en el botón de filtro (icono de `+`) para mantener el filtro.
+4. Los usuarios que coincidan con los criterios de filtro se mostrarán en la lista.
+
+## Crear un Usuario
+
+Para crear un nuevo usuario, sigue estos pasos:
+
+1. En el menu ubicado en la esquina superior derecha navega a la sección de usuarios.
+2. Haz clic en el botón "Crear Usuario".
+3. Completa el formulario con la información del usuario (nombre, dirección, teléfono y correo electrónico).
+4. Haz clic en el botón "Guardar" para crear el usuario.
+
+## Crear una Reserva
+
+Para crear una nueva reserva, sigue estos pasos:
+
+1. En el menu ubicado en la esquina superior derecha navega a la sección de reservas.
+2. Haz clic en el botón "Crear Reserva".
+3. Selecciona el usuario para el cual deseas crear la reserva buscando por el numero de telefono.
+4. Selecciona la fecha y el intervalo de tiempo para la reserva.
+5. Haz clic en el botón "Guardar" para crear la reserva.
+
+## Contribuir
+
+Si deseas contribuir a este proyecto, por favor sigue estos pasos:
+
+1. Haz un fork del repositorio.
+2. Crea una nueva rama (`git checkout -b feature/nueva-funcionalidad`).
+3. Realiza tus cambios y haz commit (`git commit -am 'Agrega nueva funcionalidad'`).
+4. Sube tus cambios a tu fork (`git push origin feature/nueva-funcionalidad`).
+5. Abre un Pull Request en el repositorio original.
