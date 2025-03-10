@@ -23,6 +23,7 @@ import { BookingsFilter } from "../filter/bookings-filter";
 import { TagsFilters } from "../filter/tags-filters";
 import { addUserService } from "@/services/user.service";
 import { IUser } from "@/types/user";
+import { MenuIcon } from "lucide-react";
 
 export const BookingHeader: React.FC = () => {
   const [openDialog1, setOpenDialog1] = React.useState(false);
@@ -41,16 +42,17 @@ export const BookingHeader: React.FC = () => {
         {format(date, "PPP")}
       </Badge>
 
-        <div className="hidden sm:block">
-          <BookingsFilter />
-          <TagsFilters />
-        </div>
-
+      <div className="hidden sm:block">
+        <BookingsFilter />
+        <TagsFilters />
+      </div>
 
       <div className="relative inline-block text-left">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline">Options</Button>
+            <Button variant="outline">
+              <MenuIcon size={16} />
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-48">
             {/* // Aquí se agregan los elementos del menú desplegable // */}
