@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { IUser } from "@/types/user";
+
 import {
   calculateBookingPosition,
   findUserForBooking,
@@ -5,10 +8,11 @@ import {
   groupConsecutiveBookings,
   minutesToTime,
 } from "@/lib/utils";
-import UserReservation from "../user/user-reservation";
-import { useState } from "react";
-import { TagsFilters } from "../filter/tags-filters";
-import { IUser } from "@/types/user";
+
+import { deleteUserService, editUserService } from "@/services/user.service";
+
+import useUserStore from "@/store/user-store";
+import useBookingStore from "@/store/booking-store";
 
 import {
   Dialog,
@@ -17,11 +21,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
+
 import { CreateUserForm } from "../user/form/user-form";
-import useUserStore from "@/store/user-store";
-import useBookingStore from "@/store/booking-store";
-import { UserFilter } from "../filter/users-filter";
-import { deleteUserService, editUserService } from "@/services/user.service";
+import UserReservation from "../user/user-reservation";
 
 export const BookingsList = () => {
   const [openEditDialog, setOpenEditDialog] = useState(false);
@@ -63,16 +65,7 @@ export const BookingsList = () => {
   }, {} as Record<string, string>);
 
   return (
-    <div className="space-y-4 w-full px-2 overflow-auto">
-      <div className="hidden max-sm:block">
-        <TagsFilters />
-      </div>
-
-      <div className="flex flex-wrap justify-between items-center bg-white rounded-sm p-1 my-1">
-        <span className="px-2 text-sm">Buscar por usuario</span>
-        <UserFilter />
-      </div>
-
+    <>
       <div className="flex">
         {/* Columna de horas */}
         <div className="w-min mr-4 text-right">
@@ -130,6 +123,6 @@ export const BookingsList = () => {
           />
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };

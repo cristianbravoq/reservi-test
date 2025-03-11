@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -14,8 +14,6 @@ import {
 } from "@/components/ui/form";
 import { Calendar } from "@/components/ui/calendar";
 import { TimePicker } from "@/components/ui/time-picker";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
@@ -30,6 +28,13 @@ import { ITimeSlot } from "@/types/booking";
 
 import useUserStore from "@/store/user-store";
 import { addBookingService } from "@/services/booking.service";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Definir el esquema de validación con zod
 const formSchema = z.object({
@@ -44,7 +49,6 @@ export const BookingForm: React.FC = () => {
   const users = useUserStore((state) => state.users);
 
   const [filteredSuggestions, setFilteredSuggestions] = useState<IUser[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const [bookingPhone, setBookingPhone] = useState("");
 
   // Configurar useForm con el esquema de validación y valores por defecto
@@ -58,29 +62,13 @@ export const BookingForm: React.FC = () => {
     },
   });
 
-  // Actualizar los usuarios con el componente de autocompletar cada vez que cambie form.setValue("userId", value)
-  const handleUserSuggestions = (value: string) => {
-    if (!value) {
-      setBookingPhone("");
-      form.setValue("userId", "");
-      setShowSuggestions(false);
-      return;
-    }
-
-    setBookingPhone(value);
-    setShowSuggestions(true);
-
-    setFilteredSuggestions(
-      users.filter((user: IUser) => user.phone.includes(value))
-    );
-
-    form.clearErrors();
-  };
-
-  const handleShowUserSuggestions = (userId: string, userPhone: string) => {
+  const handlePhoneUserChange = (userId: string, userPhone: string) => {
+    console.log("userId", userId);
+    console.log("userPhone", userPhone);
     form.setValue("userId", userId);
     setBookingPhone(userPhone);
-    setShowSuggestions(false);
+
+    form.clearErrors();
   };
 
   const handleTimeSlotChange = (timeSlot: ITimeSlot) => {
@@ -112,13 +100,16 @@ export const BookingForm: React.FC = () => {
       addBookingService(bookingData);
 
       setBookingPhone("");
-      setShowSuggestions(false);
       setSelectedDate(undefined);
       form.reset();
     } catch {
       // Manejar errores
-    } 
+    }
   };
+
+  useEffect(() => {
+    setFilteredSuggestions(users);
+  }, [users]);
 
   return (
     <Form {...form}>
@@ -130,34 +121,31 @@ export const BookingForm: React.FC = () => {
             <FormItem>
               <FormLabel>Telefono</FormLabel>
               <FormControl>
-                <div className="autocomplete">
-                  <Input
-                    type="tel"
-                    onChange={(e) => handleUserSuggestions(e.target.value)}
-                    value={bookingPhone}
-                  />
-                  {showSuggestions && bookingPhone && (
-                    <ul className="w-auto">
-                      {filteredSuggestions.length ? (
-                        filteredSuggestions.map((userSuggestion, index) => (
-                          <Badge
-                            key={index}
-                            onClick={() =>
-                              handleShowUserSuggestions(
-                                userSuggestion.id,
-                                userSuggestion.phone
-                              )
-                            }
-                          >
-                            {userSuggestion.name} - {userSuggestion.phone}
-                          </Badge>
-                        ))
-                      ) : (
-                        <li className="m-1">No suggestions available</li>
-                      )}
-                    </ul>
-                  )}
-                </div>
+                <Select
+                  onValueChange={(value) =>
+                    handlePhoneUserChange(value, bookingPhone)
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecciona un usuario" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredSuggestions.length ? (
+                      filteredSuggestions.map((userSuggestion) => (
+                        <SelectItem
+                          key={userSuggestion.id}
+                          value={userSuggestion.id}
+                        >
+                          {userSuggestion.name} - {userSuggestion.phone}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="no-suggestions" disabled>
+                        No suggestions available
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
               </FormControl>
               <FormMessage />
             </FormItem>
